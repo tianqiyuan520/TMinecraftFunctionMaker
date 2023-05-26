@@ -1,0 +1,21 @@
+{
+    "name":"t_algorithm_lib",
+    "functions":[
+        {
+            "name":"example",
+            "description":"样例\n测试",
+            "args":[
+                {
+                    "type":"storage", 
+                    "name":"t_algorithm_lib:other example.input1"
+                }
+            ],
+            "call_path":"t_algorithm_lib:other/example/start",
+            "return":{
+                "type": "storage",
+                "name": "t_algorithm_lib:other example.result"
+            },
+            "python_code":["import math","return math.cos(input0)"]
+        }
+    ]
+}

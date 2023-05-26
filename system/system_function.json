@@ -1,0 +1,38 @@
+[
+    {
+        "name": "range",
+        "args": [
+            {
+                "type": "storage",
+                "name": "t_algorithm_lib:array range.input_1"
+            },
+            {
+                "type": "storage",
+                "name": "t_algorithm_lib:array range.input_2"
+            },
+            {
+                "type": "storage",
+                "name": "t_algorithm_lib:array range.input_3"
+            }
+        ],
+        "call_path": "t_algorithm_lib:array/range/start",
+        "return": {
+            "type": "storage",
+            "name": "t_algorithm_lib:array range.result"
+        }
+    },
+    {
+        "name": "cos",
+        "args": [
+            {
+                "type": "storage",
+                "name": "t_algorithm_lib:num cos.input_1"
+            }
+        ],
+        "call_path": "t_algorithm_lib:num/cos/start",
+        "return": {
+            "type": "storage",
+            "name": "t_algorithm_lib:num cos.result"
+        }
+    }
+]
