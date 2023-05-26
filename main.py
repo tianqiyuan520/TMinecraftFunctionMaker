@@ -8,7 +8,7 @@ from TMCFM import TMCFM
 
 
 if __name__ == "__main__":
-    
+
     try:
         ## play music
         from pydub import AudioSegment
@@ -37,4 +37,4 @@ if __name__ == "__main__":
     comp.main()
     
     print("success")
-    
+    input(">>> ")
