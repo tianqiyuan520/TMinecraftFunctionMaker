@@ -5,7 +5,7 @@ class read_json:
         ...
     def read(path) -> json: 
         with open(path,"r",encoding='utf-8') as f:
-            file = json.load(f)['config']
+            file = json.load(f)
         return file
 
 class System_i_functions:

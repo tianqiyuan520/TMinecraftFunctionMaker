@@ -11,12 +11,13 @@ if __name__ == "__main__":
 
     try:
         ## play music
-        from pydub import AudioSegment
-        from pydub.playback import play
-        import random
-        rand = random.choice([1,2])
-        song = AudioSegment.from_file(f"sounds//smithing_table{rand}.mp3", format="mp3")
-        play(song)
+        # from pydub import AudioSegment
+        # from pydub.playback import play
+        # import random
+        # rand = random.choice([1,2])
+        # song = AudioSegment.from_file(f"sounds//smithing_table{rand}.mp3", format="mp3")
+        # play(song)
+        ...
     except:
         # print("Missing playsound\npip install pydub\npip install simpleaudio")
         ...
@@ -29,12 +30,11 @@ if __name__ == "__main__":
     # content = input('>>> ')
 
     #ast show
-    code_ = ast.parse(content)
-    print(ast.dump(code_))
+    # code_ = ast.parse(content)
+    # print(ast.dump(code_))
 
     comp = TMCFM(content)
-    # print(content)
     comp.main()
     
     print("success")
-    input(">>> ")
+    # input(">>> ")

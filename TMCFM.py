@@ -1,6 +1,7 @@
 import math
 import json
 import os
+import shutil
 from read_config import read_json
 D_PATH = ''
 D_NAME = ''
@@ -15,10 +16,11 @@ class TMCFM:
         # print('init success')
     def init_datapack(self):
         '''初始化数据包文件'''
-        cfg = read_json.read('config.json')
-        #清除文件
-        if (cfg["is_rewrite"]):
-            os.remove(cfg["path"])
+        cfg = read_json.read('config.json')['config']
+        #重置 整个数据包
+        if (cfg["is_rebuild"]) and os.path.exists(cfg['path']):
+            # os.remove()
+            shutil.rmtree(cfg["path"])
 
         PATH = cfg['path'] # 项目地址
         global D_NAME

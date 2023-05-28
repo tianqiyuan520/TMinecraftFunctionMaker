@@ -1,7 +1,4 @@
 import os
-import re
-from typing import Union
-
-def get() -> Union[float, int]:
-    return x
-
+folder = os.path.exists("a/t.txt")
+if not folder:
+    os.makedirs("a/t.txt")

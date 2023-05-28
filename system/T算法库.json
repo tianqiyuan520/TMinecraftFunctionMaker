@@ -16,6 +16,22 @@
                 "name": "t_algorithm_lib:other example.result"
             },
             "python_code":["import math","return math.cos(input0)"]
+        },
+        {
+            "name":"cos",
+            "description":"cos函数\n测试",
+            "args":[
+                {
+                    "type":"storage", 
+                    "name":"t_algorithm_lib:maths trigonometric_functions.input"
+                }
+            ],
+            "call_path":"t_algorithm_lib:maths/trigonometric_functions/sin_cos_tan/start",
+            "return":{
+                "type": "storage",
+                "name": "t_algorithm_lib:maths trigonometric_functions.result.cos"
+            },
+            "python_code":["import math","return math.cos(input0)"]
         }
     ]
 }

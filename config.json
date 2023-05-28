@@ -1,12 +1,12 @@
 {
     "config":{
-        "path_":"E:\\MC数据包\\1.19.4\\world\\datapacks\\test_datapack\\",
-        "path_1": "E:\\game\\.minecraft\\versions\\1.16.5-Fabric 0.11.6\\saves\\数据包编译器\\datapacks\\test_datapack\\",
-        "path": "F:\\code\\python\\mcf编译器\\test_datapack\\",
+        "path__":"E:\\MC数据包\\1.19.4\\world\\datapacks\\test_datapack\\",
+        "path": "E:\\game\\.minecraft\\versions\\1.16.5-Fabric 0.11.6\\saves\\数据包编译器\\datapacks\\test_datapack\\",
+        "path_": "F:\\code\\python\\mcf编译器\\test_datapack\\",
         "name":"test",
         "pack_format":6,
         "description":"test",
         "scoreboard_objective":"input",
-        "is_rewrite":false
+        "is_rebuild":true
     }
 }

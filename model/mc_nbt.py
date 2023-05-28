@@ -1,5 +1,17 @@
+import json
 
-from model.file_ops import read_json
+class read_json:
+    def __init__(self):
+        ...
+    def read(path) -> json: 
+        with open(path,"r",encoding='utf-8') as f:
+            try:
+                file = json.load(f)
+            except:
+                print('Json 解析文件失败')
+                file = 'Json 解析文件失败'
+        return file
+
 class MCStorage:
     '''Minecraft 的 storage'''
     def __init__(self,*args,**kwargs):
@@ -47,3 +59,37 @@ class RawJsonText:
             return str(read_json.read(self.file)).replace("'",'"')
         else:
             return '{}'
+
+class IntArray:
+    def __init__(self,*args,**kwargs):
+        if len(args) > 0:
+            self.list:list = args[0]
+    def __str__(self,*args,**kwargs) -> str:
+        x = '[I; '
+        for i in range(len(self.list)):
+            x += str(self.list[i]).replace("'",'"')
+            if i < len(self.list)-1:
+                x += ', '
+        x += ']'
+        return x
+
+class MCNbt():
+    def __init__(self,*args,**kwargs):
+        self.main:dict = kwargs
+    def __str__(self,*args,**kwargs) -> str:
+        x = '{'
+        for key,value in self.main.items():
+            x+='"' + str(key).replace("'",'"') + '"'
+            x+=' : '
+            if isinstance(value,str):
+                if value[0] == "[" or value[0] == '{':
+                    x+=(value)
+                else:
+                    x+='"' + str(value).replace("'",'"') + '"'
+            else:
+                x+=str(value).replace("'",'"')
+            x+=', '
+        x = x[0:-2]
+        x += '}'
+        return x
+

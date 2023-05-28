@@ -215,11 +215,39 @@ Module(body=[
     Expr(value=Attribute(value=Name(id='a', ctx=Load()), attr='a', ctx=Load())), 
     Expr(value=Call(func=Attribute(value=Name(id='a', ctx=Load()), attr='print', ctx=Load()), args=[Name(id='x', ctx=Load())], keywords=[]))], type_ignores=[])
 
-# BinOp Constant Name BoolOp Compare UnaryOp Subscript List Tuple Dict Call Attribute
+# BinOp Constant Name BoolOp Compare UnaryOp Subscript List Tuple Dict Call Attribute JoinedStr
 
 Module(body=[
     Import(names=[alias(name='system.t_algorithm_lib', asname='t_algorithm_lib')]), 
     Import(names=[alias(name='system.mc', asname='mc')]), 
-    ImportFrom(module='system.mc_nbt', names=[alias(name='RawJsonText', asname=None)], level=0), 
-    Expr(value=Call(func=Name(id='print', ctx=Load()), 
-    args=[Call(func=Name(id='RawJsonText', ctx=Load()), args=[], keywords=[keyword(arg='file', value=Constant(value='a.josn', kind=None))])], keywords=[]))], type_ignores=[])
+    Assign(targets=[Name(id='n', ctx=Store())], value=Attribute(value=Name(id='mc', ctx=Load()), attr='entity', ctx=Load()), type_comment=None), Expr(value=Call(func=Attribute(value=Name(id='n', ctx=Load()), attr='get_data', ctx=Load()), args=[], keywords=[]))], type_ignores=[])
+
+Module(body=[
+    Import(names=[alias(name='system.t_algorithm_lib', asname='t_algorithm_lib')]), 
+    Import(names=[alias(name='system.mc', asname='mc')]), 
+    Assign(targets=[Name(id='n', ctx=Store())], value=Constant(value=3, kind=None), type_comment=None), 
+    Assign(targets=[Name(id='a', ctx=Store())], value=Call(func=Attribute(value=Name(id='t_algorithm_lib', ctx=Load()), attr='example', ctx=Load()), args=[Constant(value=3, kind=None)], keywords=[]), type_comment=None)], type_ignores=[])
+
+
+Module(body=[
+    Import(names=[alias(name='system.t_algorithm_lib', asname='t_algorithm_lib')]), 
+    Import(names=[alias(name='system.mc', asname='mc')]), 
+    Assign(targets=[Name(id='a', ctx=Store())], value=Call(
+        func=
+        Attribute(
+            value=Call(
+                func=Attribute(
+                    value=Call(func=
+                        Attribute(value=Name(id='mc', ctx=Load()), attr='MCEntity', ctx=Load()
+                        ), 
+                        args=[Constant(value='pig', kind=None)], keywords=[]),
+                    attr='get_data', ctx=Load()
+                    ), 
+                args=[Constant(value=3, kind=None)], keywords=[]), 
+            attr='get', ctx=Load()
+        ), 
+        args=[Constant(value=222, kind=None)], keywords=[])), 
+
+    Expr(value=Call(func=Attribute(
+        value=Name(id='a', ctx=Load()), attr='get_data', ctx=Load()), 
+        args=[Constant(value=332213, kind=None)], keywords=[]))], type_ignores=[])
