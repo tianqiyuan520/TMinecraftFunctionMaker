@@ -202,7 +202,7 @@ class Parser(Storage_editor):
                 self.py_change_value(i.id,value,False,func,False,index,**kwargs)
                 is_global = self.py_get_value_global(i.id,func,index,**kwargs)
             # mcf 赋值
-                self.mcf_change_value_by_operation2(f'{defualt_STORAGE} main_tree[-1].data[{{"id":"{i.id}"}}].value',f'{defualt_STORAGE} main_tree[-1].Subscript.value',tree.op,func,-1,**kwargs)
+                self.mcf_change_value_by_operation2(f'{defualt_STORAGE} main_tree[-1].data[{{"id":"{i.id}"}}].value',f'{defualt_STORAGE} main_tree[-1].Subscript[-1].value',tree.op,func,-1,**kwargs)
                 if(is_global):
                     self.mcf_change_value_by_scoreboard(f'{defualt_STORAGE} main_tree[0].data[{{"id":"{i.id}"}}].value',f'#{defualt_NAME}.system.temp1 {scoreboard_objective}','double',0.001,func,**kwargs)
         elif isinstance(tree.value,ast.Call):
@@ -257,7 +257,7 @@ class Parser(Storage_editor):
                 # 切片赋值
                 self.Subscript(tree_list[item],func,**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].exp_operation','append',{"value":0,"type":"num"},func,**kwargs)
-                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].exp_operation[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].exp_operation[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
                 value = 0
                 tree_list[item] = ast.Constant(value=value, kind=["is_call",None])
         tree.left,tree.right = (tree_list[0],tree_list[1])
@@ -348,8 +348,8 @@ class Parser(Storage_editor):
                     self.py_change_value_type(i.id,None,index,True,**kwargs)
                     is_global = self.py_get_value_global(i.id,func,index,**kwargs)
                     if(is_global):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[0].data[{{"id":"{i.id}"}}].value set from storage {defualt_STORAGE} main_tree[-1].Subscript.value\n',**kwargs)
-                    self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data[{{"id":"{i.id}"}}].value set from storage {defualt_STORAGE} main_tree[-1].Subscript.value\n',**kwargs)
+                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[0].data[{{"id":"{i.id}"}}].value set from storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value\n',**kwargs)
+                    self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data[{{"id":"{i.id}"}}].value set from storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value\n',**kwargs)
         elif isinstance(tree.value,ast.Call):
             # 函数返回值 赋值
             value = self.Expr(ast.Expr(value=tree.value),func,-1,**kwargs)
@@ -750,7 +750,7 @@ class Parser(Storage_editor):
                     #
                     self.py_call_list_append(-1,{"value":0,"id":i.id,"is_constant":False})
                     self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].call_list','append',{"value":0,"id":f"{i.id}"},func,**kwargs)
-                    self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].call_list[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+                    self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].call_list[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
         elif isinstance(tree.value,ast.Call):
             for i in tree.targets:
                 if isinstance(i,ast.Name):
@@ -834,7 +834,7 @@ class Parser(Storage_editor):
                 self.main_tree[-2]['return'].append(0)
             self.Subscript(tree.value,func,**kwargs)
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-2].return','append',{"value":0},func,**kwargs)
-            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-2].return[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-2].return[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
             self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_return set value 1b\n',**kwargs)
             self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
         self.write_file(func,f'##函数返回值处理_end\n',**kwargs)
@@ -845,10 +845,10 @@ class Parser(Storage_editor):
         if isinstance(tree.value,ast.Subscript):
             self.Subscript(tree.value,func,**kwargs)
             self.Subscript_index(tree.slice,func,**kwargs)
-            self.write_file(func,f'data modify storage t_algorithm_lib:array get_element_by_index.list set from storage {defualt_STORAGE} main_tree[-1].Subscript.value\n',**kwargs)
+            self.write_file(func,f'data modify storage t_algorithm_lib:array get_element_by_index.list set from storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value\n',**kwargs)
             self.write_file(func,f'function t_algorithm_lib:array/get_element_by_index/start\n',**kwargs)
             self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript append value {{"value":0}}\n',**kwargs)
-            self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript.value set from storage t_algorithm_lib:array get_element_by_index.list2\n',**kwargs)
+            self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value set from storage t_algorithm_lib:array get_element_by_index.list2[0]\n',**kwargs)
         else:
             if isinstance(tree.value,ast.Call):
                 # 函数返回值
@@ -857,14 +857,14 @@ class Parser(Storage_editor):
                 self.write_file(func,f'data modify storage t_algorithm_lib:array get_element_by_index.list set from storage {defualt_STORAGE} main_tree[-1].return[-1].value\n',**kwargs)
                 self.write_file(func,f'function t_algorithm_lib:array/get_element_by_index/start\n',**kwargs)
                 self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript append value {{"value":0}}\n',**kwargs)
-                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript.value set from storage t_algorithm_lib:array get_element_by_index.list2\n',**kwargs)
+                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value set from storage t_algorithm_lib:array get_element_by_index.list2[0]\n',**kwargs)
             elif isinstance(tree.value,ast.Name):
                 # 变量
                 self.Subscript_index(tree.slice,func,**kwargs)
                 self.write_file(func,f'data modify storage t_algorithm_lib:array get_element_by_index.list set from storage {defualt_STORAGE} main_tree[-1].data[{{"id":{tree.value.id}}}].value\n',**kwargs)
                 self.write_file(func,f'function t_algorithm_lib:array/get_element_by_index/start\n',**kwargs)
                 self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript append value {{"value":0}}\n',**kwargs)
-                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript.value set from storage t_algorithm_lib:array get_element_by_index.list2\n',**kwargs)
+                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value set from storage t_algorithm_lib:array get_element_by_index.list2[0]\n',**kwargs)
             elif isinstance(tree.value,ast.BinOp):
                 # 运算
                 self.Subscript_index(tree.slice,func,**kwargs)
@@ -874,26 +874,26 @@ class Parser(Storage_editor):
                 self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage t_algorithm_lib:array get_element_by_index.list set from storage {defualt_STORAGE} main_tree[-1].exp_operation[-1].value\n',**kwargs)
                 self.write_file(func,f'function t_algorithm_lib:array/get_element_by_index/start\n',**kwargs)
                 self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript append value {{"value":0}}\n',**kwargs)
-                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript.value set from storage t_algorithm_lib:array get_element_by_index.list2[0]\n',**kwargs)
+                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value set from storage t_algorithm_lib:array get_element_by_index.list2[0]\n',**kwargs)
             elif isinstance(tree.value,ast.Constant):
                 self.Subscript_index(tree.slice,func,**kwargs)
                 self.write_file(func,f'data modify storage t_algorithm_lib:array get_element_by_index.list set from storage {defualt_STORAGE} main_tree[-1].data[{{"id":{tree.value.value}}}].value\n',**kwargs)
                 self.write_file(func,f'function t_algorithm_lib:array/get_element_by_index/start\n',**kwargs)
                 self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript append value {{"value":0}}\n',**kwargs)
-                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript.value set from storage t_algorithm_lib:array get_element_by_index.list2\n',**kwargs)
+                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value set from storage t_algorithm_lib:array get_element_by_index.list2[0]\n',**kwargs)
             elif isinstance(tree.value,ast.List):
                 self.List(tree.value,func,**kwargs)
                 self.Subscript_index(tree.slice,func,**kwargs)
                 self.write_file(func,f'data modify storage t_algorithm_lib:array get_element_by_index.list set from storage {defualt_STORAGE} main_tree[-1].list_handler\n',**kwargs)
                 self.write_file(func,f'function t_algorithm_lib:array/get_element_by_index/start\n',**kwargs)
                 self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript append value {{"value":0}}\n',**kwargs)
-                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript.value set from storage t_algorithm_lib:array get_element_by_index.list2\n',**kwargs)
+                self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value set from storage t_algorithm_lib:array get_element_by_index.list2[0]\n',**kwargs)
 
     def Subscript_index(self,tree:ast.Index,func,*args,**kwargs):
         # 类型扩建TODO
         if isinstance(tree.value,ast.Subscript):
             self.Subscript(tree.value,func,**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #tal.array.get_element_by_index.index tal.input run data get storage {defualt_STORAGE} main_tree[-1].Subscript.value\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #tal.array.get_element_by_index.index tal.input run data get storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value\n',**kwargs)
         elif isinstance(tree.value,ast.Name):
             self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #tal.array.get_element_by_index.index tal.input run data get storage {defualt_STORAGE} main_tree[-1].data[{{"id":{tree.value.id}}}].value\n',**kwargs)
         elif isinstance(tree.value,ast.Call):
@@ -1015,7 +1015,7 @@ class Parser(Storage_editor):
             self.main_tree[-1]['condition_time'] += 1
             self.Subscript(tree.test,func,**kwargs)
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].boolOPS','append',{"value":0},func,**kwargs)
-            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
             self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value\n',**kwargs)
             self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches 1.. run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
             self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches ..0 run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 0\n',**kwargs)
@@ -1149,7 +1149,7 @@ class Parser(Storage_editor):
                 
                 self.Subscript(item,func,**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].boolOPS','append',{"value":0},func,**kwargs)
-                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
                 self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value\n',**kwargs)
                 self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches 1.. run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
                 self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches ..0 run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 0\n',**kwargs)
@@ -1288,7 +1288,7 @@ class Parser(Storage_editor):
         elif isinstance(tree.operand,ast.Subscript):
             self.Subscript(tree.operand,func,**kwargs)
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].boolOPS','append',{"value":0},func,**kwargs)
-            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
             self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value\n',**kwargs)
             self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches 1.. run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
             self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches ..0 run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 0\n',**kwargs)
@@ -1407,7 +1407,7 @@ execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches
             self.main_tree[-1]['condition_time'] += 1
             self.Subscript(tree.test,func,**kwargs)
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].boolOPS','append',{"value":0},func,**kwargs)
-            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value','set',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
             self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[-1].boolOPS[-1].value\n',**kwargs)
             self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches 1.. run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
             self.write_file(func,f'execute if score #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches ..0 run scoreboard players set #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective} 0\n',**kwargs)
@@ -1540,7 +1540,7 @@ execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches
                 self.main_tree[-1]["list_handler"].append(None)
                 text = '[-1]'*loop_time
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].list_handler{text}','append',[],func,**kwargs)
-                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].list_handler[-1]{text}','append',f'storage {defualt_STORAGE} main_tree[-1].Subscript.value',func,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].list_handler[-1]{text}','append',f'storage {defualt_STORAGE} main_tree[-1].Subscript[-1].value',func,**kwargs)
             elif isinstance(item,ast.Call):
                 # 函数返回值 赋值
                 self.Expr(ast.Expr(value=item),func,-1,**kwargs)
@@ -1574,8 +1574,8 @@ execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches
                 self.mcf_store_value_by_run_command(f'storage {defualt_STORAGE} main_tree[-1].list_handler[-1]{text}',f'int 1',f'scoreboard players get #{defualt_NAME}.system.c.{(self.main_tree[-1]["BoolOpTime"])}.pass {scoreboard_objective}',func,**kwargs)
                 self.mcf_remove_stack_data(func,**kwargs)
             elif isinstance(item,ast.List):
-                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].list_handler{text}','append',[],func,**kwargs)
-                self.List(item,func,loop_time+1,**kwargs)
+                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].list_handler{text}','append',[[]],func,**kwargs)
+                self.List(item,func,loop_time+2,**kwargs)
 
 # 逻辑调用
 
