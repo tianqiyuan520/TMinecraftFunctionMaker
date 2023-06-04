@@ -5,7 +5,7 @@ author:天起源
 '''
 import ast
 from TMCFM import TMCFM
-
+from read_config import read_json
 
 if __name__ == "__main__":
 
@@ -24,14 +24,15 @@ if __name__ == "__main__":
 
     #open file
     content = ""
-    with open('a.py','r',encoding='utf-8') as f:
+    cfg = read_json.read('config.json')['config']
+    with open(cfg["InputFile"],'r',encoding='utf-8') as f:
         # content = f.read().split('\n')
         content = f.read()
     # content = input('>>> ')
 
     #ast show
-    # code_ = ast.parse(content)
-    # print(ast.dump(code_))
+    code_ = ast.parse(content)
+    print(ast.dump(code_))
 
     comp = TMCFM(content)
     comp.main()

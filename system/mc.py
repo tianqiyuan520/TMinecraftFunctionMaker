@@ -47,6 +47,7 @@ def WriteFunction(name=None,Command=None,mode=None,path=None) -> None:
         - path 为相对路径加函数名(例如:"x\\","test2\\")
         - Command  数组 (例如：["say 1","say 2"])
         - mode： "w"覆写，"a"追加 默认追加
+
         example:
         >>> WriteFunction("test",["say 1"],"a","abc\\xc\\")
         
@@ -60,10 +61,23 @@ def newTags(TagName=None,NameSpace=None,Value=None,Path=None) -> None:
         - Value 命名空间 + 函数名称 的 数组 (例如:["test:load/_start","test:xx"...]) 
         - Path 为相对路径加函数名(例如:"x\\","test2\\")
         - TagName 标签名称
+
         example:
         >>> newTags("load","minecraft",["test:a"],"functions\\3")
         
         将在 {数据包}\\minecraft\\Tags\\functions\\3\\load 下 写入 ["test:a"]
+    """
+
+
+def checkBlock(Pos:list=None,BlockId:str=None) -> bool:
+    """
+        判断 给定坐标的方块是否为指定方块
+        - 返回1/0
+        - Pos 坐标
+        - BlockId 方块ID
+
+        example:
+        >>> checkBlock("0 0 0","minecraft:air")
     """
 
 ## 工具 类

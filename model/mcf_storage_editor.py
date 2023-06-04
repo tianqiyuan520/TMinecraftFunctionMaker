@@ -11,41 +11,79 @@ class Storage_editor:
     def __init__(self) -> None:
         pass
     def write_file(self,func:str,text,*args,**kwargs):
-        '''写文件 f2为函数详细名称,p为函数的相对位置'''
+        '''读写函数 f2为函数详细名称,p为函数的相对位置'''
         func2 = '_start'
         PATH_ = None
+        mode = "a"
+        ClassName = ""
+        Is_def_func = False
         for key, value in kwargs.items():
-            if(key=='f2'or key ==  'func2'):
+            if((key=='f2'or key ==  'func2') and value != None):
                 func2 = value
             if(key=='p'or key ==  'path'):
                 PATH_ = value
+            if((key=='c'or key ==  'ClassName' )and value != None):
+                ClassName = value
+            if(key=='def_function' and value == True):
+                Is_def_func = True
+            if(key=='FunctionPath'):
+                ## 函数的相对路径
+                Is_def_func = True
+            if(key=='mode'):
+                ## 读写模式
+                mode = value
+        if(Is_def_func):
+            PATH_ = None
+        if ClassName != "":
+            ClassName = ClassName+'\\'
         if(PATH_==None):
-            path = defualt_PATH+'functions\\'+func+'\\'
-            func_path = defualt_PATH+'functions\\'+func+'\\'+func2+'.mcfunction'
+            path = defualt_PATH+'functions\\'+ClassName+func+'\\'
+            func_path = defualt_PATH+'functions\\'+ClassName+func+'\\'+func2+'.mcfunction'
             folder = os.path.exists(path)
             if not folder:
                 os.makedirs(path)
             folder = os.path.exists(func_path)
             if folder:
-                with open(func_path,'a',encoding='utf-8') as f:
+                with open(func_path,mode,encoding='utf-8') as f:
                     f.write(text)
             else:
-                with open(func_path,'w',encoding='utf-8') as f:
+                with open(func_path,"w",encoding='utf-8') as f:
                     f.write(text)
         else:
-            PATH_ = defualt_PATH+'functions\\'+PATH_+'\\'
+            PATH_ = defualt_PATH+'functions\\'+ClassName+PATH_
+            if(PATH_[-1]!="\\"):
+                PATH_ += "\\"
             func_path = PATH_+func2+'.mcfunction'
             folder = os.path.exists(PATH_)
             if not folder:
                 os.makedirs(PATH_)
             folder = os.path.exists(func_path)
             if folder:
-                with open(func_path,'a',encoding='utf-8') as f:
+                with open(func_path,mode,encoding='utf-8') as f:
                     f.write(text)
             else:
                 with open(func_path,'w',encoding='utf-8') as f:
                     f.write(text)
-
+        return self
+    def WriteT(self,text,name="1",path=defualt_PATH,*args,**kwargs):
+        '''读写文件'''
+        mode = "a"
+        for key, value in kwargs.items():
+            if(key=='mode'):
+                ## 读写模式
+                mode = value
+        
+        folder = os.path.exists(path)
+        if not folder:
+            os.makedirs(path)
+        file_path = path if path[-1] == '\\' else path + '\\'
+        folder = os.path.exists(file_path)
+        if folder:
+            with open(file_path+name,mode,encoding='utf-8') as f:
+                f.write(text)
+        else:
+            with open(file_path+name,"w",encoding='utf-8') as f:
+                f.write(text)
     def mcf_change_value(self,key,value,is_global:False,func:str,isfundef:False,index:-1,*args,**kwargs):
         '''修改mcf中的堆栈值 常量修改'''
         if isinstance(value,str):
@@ -180,9 +218,10 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
         else:
             self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove {Storage}\n',**kwargs)
 
-    def mcf_store_value_by_run_command(self,VALUE,command,func:str,flag='result',*args,**kwargs):
+    def mcf_store_value_by_run_command(self,VALUE,Type,command,func:str,flag='result',*args,**kwargs):
         '''store'''
-        self.write_file(func,f'execute store {flag} {VALUE} run {command}\n',**kwargs)
+        self.write_file(func,f'execute store {flag} {VALUE} {Type} run {command}\n',**kwargs)
+
 
 
     def mcf_change_value_by_scoreboard(self,Storage,scoreboard,type:str,scale:str,func:str,*args,**kwargs):
@@ -190,7 +229,10 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {Storage} {type} {scale} run scoreboard players get {scoreboard}\n',**kwargs)
     
     def mcf_compare_Svalues(self,Storage,Storage2,flag,func,command,*args,**kwargs):
-        '''比较 两个 storage值的大小'''
+        '''比较 两个 storage值的大小
+        
+        并执行command
+        '''
         if isinstance(flag,ast.Gt):
             #大于
             self.write_file(func,
@@ -201,8 +243,13 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
             f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {Storage} 1000\nexecute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {Storage2} 1000\nexecute if score #{defualt_NAME}.system.temp1 {scoreboard_objective} < #{defualt_NAME}.system.temp2 {scoreboard_objective} run {command}\n',**kwargs)
         elif isinstance(flag,ast.Eq):
             #等于
+            ##数字判断
+            self.write_file(func,
+            f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {Storage} 1000\nexecute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {Storage2} 1000\nexecute if score #{defualt_NAME}.system.temp1 {scoreboard_objective} = #{defualt_NAME}.system.temp2 {scoreboard_objective} run {command}\n',**kwargs)
+            ##任意判断
             self.write_file(func,
             f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store success score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data modify storage {Storage} set from storage {Storage2} \nexecute if score #{defualt_NAME}.system.temp1 {scoreboard_objective} matches 0 run {command}\n',**kwargs)
+            
         elif isinstance(flag,ast.GtE):
             #大于或等于
             self.write_file(func,
@@ -219,7 +266,7 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
     def mcf_new_stack(self,func,*args,**kwargs):
         '''新建栈'''
         self.write_file(func,f'#新建栈\n',**kwargs)
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree append value {{"data":[],"return":[],"type":"","exp_operation":[],"boolOPS":[],"boolResult":[],"for_list":[],"call_list":[],"list_handler":[]}}\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree append value {{"data":[],"return":[],"exp_operation":[],"boolOPS":[],"boolResult":[],"for_list":[],"call_list":[],"call_list_":[],"list_handler":[]}}\n',**kwargs)
         
     def mcf_new_stack_inherit_data(self,func,*args,**kwargs):
         '''新建的栈 继承上一个栈值的data数据'''
@@ -230,21 +277,49 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-2].data set from storage {defualt_STORAGE} main_tree[-1].data\n',**kwargs)
     def mcf_remove_stack_data(self,func:str,*args,**kwargs):
         '''出栈'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[-1]\n',**kwargs)
+        self.write_file(func,f'data remove storage {defualt_STORAGE} main_tree[-1]\n',**kwargs)
+        self.write_file(func,f'scoreboard players reset #{defualt_STORAGE}.stack.end {scoreboard_objective}\n',**kwargs)
 
     def mcf_stack_break(self,func:str,*args,**kwargs):
         '''栈 中 break'''
         self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
         self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_break set value 1b\n',**kwargs)
+        # self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_end set value 1b\n',**kwargs)
+
 
     def mcf_stack_continue(self,func:str,*args,**kwargs):
         '''栈 中 continue'''
         self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
         self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_continue set value 1b\n',**kwargs)
+        # self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_end set value 1b\n',**kwargs)
+
+    def mcf_stack_return(self,func:str,*args,**kwargs):
+        '''栈 中 return'''
+        self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
+        self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_return set value 1b\n',**kwargs)
+        # self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_end set value 1b\n',**kwargs)
 
     def mcf_reset_score(self,value,func,**kwargs):
         '''重置实体记分板值'''
         self.write_file(func,f'scoreboard players reset {value}\n',**kwargs)
+
+    def mcf_remove_Last_exp_operation(self,func,**kwargs):
+        '''移除 exp_operation[-1]'''
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[-1].exp_operation[-1]\n',**kwargs)
+
+    def mcf_call_function(self,func_name,func,isCustom=False,prefix="",**kwargs):
+        '''调用mcf函数
+        
+        - isCustom: 是否为非本数据包的函数
+        - prefix: 前缀
+        '''
+        if not isCustom:
+            # class
+            ClassNamep= "" if kwargs.get("ClassName") == None else kwargs.get("ClassName")+"/"
+            self.write_file(func,f'{prefix}function {defualt_NAME}:{ClassNamep}{func_name}\n',**kwargs)
+        else:
+            self.write_file(func,f'{prefix}function {func_name}\n',**kwargs)
+
 
 
 

@@ -1,0 +1,1 @@
+[2023-06-03 23:47:49] 父类未定义 in File "f:\code\python\mcf编译器\Parser.py", line 1765

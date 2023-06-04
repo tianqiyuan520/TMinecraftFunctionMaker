@@ -251,3 +251,9 @@ Module(body=[
     Expr(value=Call(func=Attribute(
         value=Name(id='a', ctx=Load()), attr='get_data', ctx=Load()), 
         args=[Constant(value=332213, kind=None)], keywords=[]))], type_ignores=[])
+
+
+Assign(targets=[Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='xx', ctx=Load()), attr='aa', ctx=Store())], value=Constant(value=1, kind=None), type_comment=None)
+
+
+AnnAssign(target=Name(id='a', ctx=Store()), annotation=Name(id='str', ctx=Load()), value=Call(func=Name(id='test', ctx=Load()), args=[Constant(value=22, kind=None)], keywords=[]), simple=1)
