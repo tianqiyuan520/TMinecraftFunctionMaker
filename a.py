@@ -26,3 +26,7 @@ class test(aa):
 a= test(22)
 x = a.fib(a.b(10)+5)
 print(x)
+
+
+x = input()
+mc.setblock([1,2,3],x)
