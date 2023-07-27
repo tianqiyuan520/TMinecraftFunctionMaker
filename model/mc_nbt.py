@@ -93,3 +93,24 @@ class MCNbt():
         x += '}'
         return x
 
+class Macher:
+    # 判断器
+    def __init__(self,*args,**kwargs) -> None:
+        if len(args) >= 3:
+            self.type,self.content,self.num = args[0:3]
+        else:
+            raise BaseException('Macher 参数 数量小于2')
+    def __str__(self,*args,**kwargs) -> str:
+        if(self.type == "score"):
+            return f'if score {self.content} matches {self.num}'
+
+class Macher2(Macher):
+    # 判断器
+    def __init__(self,*args,**kwargs) -> None:
+        if len(args) >= 3:
+            self.type,self.content,self.num = args[0:3]
+        else:
+            raise BaseException('Macher 参数 数量小于2')
+    def __str__(self,*args,**kwargs) -> str:
+        if(self.type == "score"):
+            return f'if score {self.content} matches {self.num}'     

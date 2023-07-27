@@ -6,6 +6,7 @@ from config import defualt_STORAGE # STORAGE
 from config import scoreboard_objective # 默认记分板
 from config import defualt_NAME # 项目名称
 
+
 class Storage_editor:
     '''有光mcf storage的修改'''
     def __init__(self) -> None:
@@ -266,7 +267,7 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
     def mcf_new_stack(self,func,*args,**kwargs):
         '''新建栈'''
         self.write_file(func,f'#新建栈\n',**kwargs)
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree append value {{"data":[],"return":[],"exp_operation":[],"boolOPS":[],"boolResult":[],"for_list":[],"call_list":[],"call_list_":[],"list_handler":[]}}\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree append value {{"data":[],"return":[],"exp_operation":[],"boolOPS":[],"for_list":[],"call_list":[],"call_list_":[],"list_handler":[]}}\n',**kwargs)
         
     def mcf_new_stack_inherit_data(self,func,*args,**kwargs):
         '''新建的栈 继承上一个栈值的data数据'''
@@ -307,7 +308,7 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
         '''移除 exp_operation[-1]'''
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[-1].exp_operation[-1]\n',**kwargs)
 
-    def mcf_call_function(self,func_name,func,isCustom=False,prefix="",**kwargs):
+    def mcf_call_function(self,func_name,func,isCustom=False,prefix="",matcher=None,**kwargs):
         '''调用mcf函数
         
         - isCustom: 是否为非本数据包的函数

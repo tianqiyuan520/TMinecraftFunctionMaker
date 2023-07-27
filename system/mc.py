@@ -155,3 +155,8 @@ class MCEntity:
         类似data get entity XX xx
         '''
         return 0.0
+
+
+class _():
+    air_block="minecraft:air"
+ 
