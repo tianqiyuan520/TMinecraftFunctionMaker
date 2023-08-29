@@ -1,37 +1,43 @@
 import system.t_algorithm_lib as t_algorithm_lib
 import system.mc as mc
-#
+# #
 mc.NewFunction('load')
 mc.WriteFunction('load',["say 重载完成222","playsound minecraft:block.anvil.land voice @a ~ ~ ~ 2 2"])
 mc.newTags("load","minecraft",["test:load"],"functions")
+mc.newTags("tick","minecraft",["test:tick"],"functions")
 
-class aa:
-    def __init__(self,*args) -> None:
-        pass
-    def b(self,x)->"aa":
-        self.x = x
-        return self
+# class aa:
+#     def __init__(self,*args) -> None:
+#         pass
+#     def b(self,x)->"aa":
+#         self.x = x
+#         return self
 
-    def fib(self,n):
-        if n <= 2:
-            return 1
-        else:
-            return self.fib(n - 1) + self.fib(n - 2)
-class test(aa):
-    def __init__(self,x=3)->str:
-        self.xx = 1
-        # self.xx.xxx = 1
-    def a(self,x):
-        print(x)
-    def b(self,x):
-        print('*  ',x)
-        return x
-    def c(self):
-        return self
+#     def fib(self,n):
+#         if n <= 2:
+#             return 1
+#         else:
+#             return self.fib(n - 1) + self.fib(n - 2)
+# class test(aa):
+#     def __init__(self,x=3)->str:
+#         self.xx = 1
+#         # self.xx.xxx = 1
+#     def a(self,x):
+#         print(x)
+#     def b(self,x):
+#         print('*  ',x)
+#         return x
+#     def c(self):
+#         return self
 
-a= test(22)
-x = a.fib(a.b(10)+5)
-print(x)
+# a= test(22)
+# x = a.fib(a.b(10)+5)
+# print(x)
+
+# @mc.event.ifEntytPosDownZero("tianqiyuan520")
+# def test_aa():
+    # print("aaa",1+1)
+
 
 # a = aa("aaa")
 # a.b(1).b(2)
@@ -44,3 +50,10 @@ print(x)
 # a = 1 and 3
 # print(a)
 # a = (1==1 and 1==1)
+
+def test():
+    i = 0
+    while i < 10:
+        mc.run(['say ',str(i)])
+        i += 1
+test()

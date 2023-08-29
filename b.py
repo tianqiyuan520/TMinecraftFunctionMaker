@@ -258,11 +258,27 @@ Assign(targets=[Attribute(value=Attribute(value=Name(id='self', ctx=Load()), att
 
 AnnAssign(target=Name(id='a', ctx=Store()), annotation=Name(id='str', ctx=Load()), value=Call(func=Name(id='test', ctx=Load()), args=[Constant(value=22, kind=None)], keywords=[]), simple=1)
 
-Module(body=[ClassDef(name='aa', bases=[], keywords=[], body=[
-    FunctionDef(name='b', args=arguments(posonlyargs=[], args=[arg(arg='self', annotation=None, type_comment=None), arg(arg='x', annotation=None, type_comment=None)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=[
-        Assign(
-            targets=
-        [Attribute(value=Name(id='self', ctx=Load()), attr='x', ctx=Store())], 
-        value=Call(func=Name(id='aa', ctx=Load()), args=[Constant(value=3131, kind=None)], keywords=[]), type_comment=None),
-Return(value=Name(id='self', ctx=Load()))], decorator_list=[], returns=Constant(value='aa', kind=None), type_comment=None)
-], decorator_list=[]), Assign(targets=[Name(id='a', ctx=Store())], value=Call(func=Name(id='aa', ctx=Load()), args=[Constant(value=23, kind=None)], keywords=[]), type_comment=None), Expr(value=Call(func=Attribute(value=Name(id='a', ctx=Load()), attr='b', ctx=Load()), args=[Constant(value=3, kind=None)], keywords=[]))], type_ignores=[])
+decorator_list=[
+    Call
+    (func=Attribute(
+        value=Attribute(value=Name(id='mc', ctx=Load()), attr='event', ctx=Load()), attr='entityDeath', ctx=Load()
+        ), 
+    args=[Constant(value='eee', kind=None)], keywords=[])]
+
+decorator_list=[
+    Attribute(
+            value=Attribute(
+                value=Name(id='mc', ctx=Load()), 
+                attr='event', ctx=Load()), 
+            attr='entityDeath', ctx=Load())]
+
+Expr(value=Call(
+    func=Attribute(
+        value=Attribute(value=Attribute(value=Name(id='a', ctx=Load()), attr='b', ctx=Load()), attr='c', ctx=Load()), attr='append', ctx=Load()),
+    args=[Constant(value=3, kind=None)], keywords=[]))
+
+Expr(value=Attribute(
+    value=Attribute(value=Call(func=Name(id='test', ctx=Load()), args=[], keywords=[]), attr='a', ctx=Load()), attr='b', ctx=Load())
+    )
+
+Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='x', ctx=Load()), attr='a', ctx=Load()), attr='ax', ctx=Load()), args=[], keywords=[]))

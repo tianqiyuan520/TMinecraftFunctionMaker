@@ -2,89 +2,6 @@
 
 a compiler that compiles python code into Minecraft datapack functions
 
-## English
-
-### How to use
-
-#### First
-
-you should create a config file (path:"~\config.json")
-
-path: the path where the datapack is
-
-name: the Namespace of datapack
-
-pack_format: the version of datapack
-
-description: the description of datapack
-
-scoreboard_objective: the default scoreboard objective
-
-#### Second
-
-create your python code
-
-for example:
-
-write this code in "a.py"
-
-```python
-a=1
-print(1)
-```
-
-then run the "main.py"
-
-If everything goes successfully,there will be your compiled datapack in your custom path
-
-#### Finally
-
-put this datapack in your game, then run /reload
-wait for reloading
-
-then run /function {yourNameSpace}:load/_start
-
-### extra
-
-#### the function of python will be a folder in datapck file
-
-for examples:
-
-```python
-a=1
-print(1)
-```
-
-the compiled function will be in the path ( {yourNameSpace}:load/_start )
-
-```python
-a = 3
-def a():
-    return b
-```
-
-the compiled function will be in the path ( {yourNameSpace}:load/_start and {yourNameSpace}:a/_start )
-
-#### the rule of compiling
-
-Now supports basic grammar (such as Assign, Operation, BoolOperation, FunctionDef, for loop, while loop, return .etc)
-
-But now not support inner python function(or class) and other libraries
-
-Some function should be used in other ways.
-
-Compiling them with the support of other datapack( some function library , such as my datapack "TAlgorithmLibrary" ) is necessary
-
-### theory
-
-Use python ast library to translate the python code into ast.
-
-Then walks through the ast and build Mcfunction according to the specific ast node name.
-
-The most important thing is to have stack thoughts
-
----
-
 ## Chinese
 
 这是一个将 python 代码编译为 Minecraft 数据包函数的编译器
@@ -94,6 +11,8 @@ The most important thing is to have stack thoughts
 #### 第一 新建配置文件
 
 使用之前需要在本路径下新建你的配置文件
+
+InputFile: 要编译的代码文件
 
 path: 数据包地址
 
@@ -109,7 +28,7 @@ scoreboard_objective: 基本的记分板名称
 
 接下来 书写你的 python 代码
 
-在本路径下的 "a.py" 写入
+在 编译的代码文件 写入
 
 ```python
 a=1
@@ -118,7 +37,7 @@ print(1)
 
 然后运行 "main.py"
 
-如果编译没报错的话，将在你设定的路径中生成数据包
+如果编译无报错的话，将在你设定的路径中生成数据包
 
 #### 第三 运行数据包
 
@@ -151,11 +70,9 @@ def a():
 
 现在支持基础语法 (例如 Assign, Operation, BoolOperation, FunctionDef, for loop, while loop, return .etc)
 
-但不支持python的内置函数或类等，或其他第三方库
+一些数据类型的属性与方法，面向对象，MC动态命令
 
-所以对于这种情况，要特殊处理
-
-编译这些函数时需要其他数据包（尤其是函数库类型的数据包，例如 "T算法库","小豆数学库"...）的支持
+编译python库函数与第三方函数需要其他数据包（例如 "T算法库","小豆数学库"...）的支持
 
 ### 原理
 
@@ -165,4 +82,70 @@ def a():
 
 最重要的是要具备 堆栈思想
 
-当然可以也先去研究 编译原理(会更困难)
+当然也可以直接应用 编译原理(会更困难)
+
+---
+
+### 样例
+
+#### 面向对象的斐波那契数列
+
+```python
+import system.t_algorithm_lib as t_algorithm_lib
+import system.mc as mc
+# #
+mc.NewFunction('load')
+mc.WriteFunction('load',["say 重载完成222","playsound minecraft:block.anvil.land voice @a ~ ~ ~ 2 2"])
+mc.newTags("load","minecraft",["test:load"],"functions")
+mc.newTags("tick","minecraft",["test:tick"],"functions")
+
+class aa:
+    def __init__(self,*args) -> None:
+        pass
+    def b(self,x)->"aa":
+        self.x = x
+        return self
+
+    def fib(self,n):
+        if n <= 2:
+            return 1
+        else:
+            return self.fib(n - 1) + self.fib(n - 2)
+class test(aa):
+    def __init__(self,x=3)->str:
+        self.xx = 1
+        # self.xx.xxx = 1
+    def a(self,x):
+        print(x)
+    def b(self,x):
+        print('*  ',x)
+        return x
+    def c(self):
+        return self
+
+a= test(22)
+x = a.fib(a.b(10)+5)
+print(x)
+```
+
+#### 事件监听
+
+```python
+@mc.event.ifEntytPosDownZero("@a")
+def test_aa():
+    print("aaa",1+1)
+```
+
+#### 动态命令
+
+```python
+import system.mc as mc
+def test():
+    i = 0
+    while i < 10:
+        mc.run(['say ',str(i)])
+        i+=1
+test()
+```
+
+---

@@ -1,4 +1,5 @@
 import json
+from typing import Callable
 
 class read_json:
     def __init__(self,path):
@@ -9,10 +10,13 @@ class read_json:
         return file
 
 
-def run(command:str = "say hello world",flag:str="result"):
+def run(command:str = "say hello world",record=False,flag:str="result"):
     """
         - 执行mc指令
-        
+        - command 为指令(支持动态命令)
+        - record 为是否以execute store result 形式运行该指令，默认否
+        - flag 为以execute store result 形式运行该指令时，存储result或success
+
         example:
         
         >>> run('say hi') 
@@ -21,7 +25,9 @@ def run(command:str = "say hello world",flag:str="result"):
         #将在mcfunction写入execute store result ... run say hi . 将命令执行结果返回给变量a
         >>> a = run('say hi','success') 
         #将在mcfunction写入execute store success ... run say hi . 将命令执行结果返回给变量a
-        
+        >>> x = 1
+        >>> run(['say ',x])
+        #动态命令 将在mcfunction写入 say 1
     """
 
     return 0.0
@@ -46,10 +52,11 @@ def WriteFunction(name=None,Command=None,mode=None,path=None) -> None:
         - name 为函数名(例如:"a","test") 
         - path 为相对路径加函数名(例如:"x\\","test2\\")
         - Command  数组 (例如：["say 1","say 2"])
-        - mode： "w"覆写，"a"追加 默认追加
+        - mode： "w"覆写，"a"追加 默认为追加模式
 
         example:
         >>> WriteFunction("test",["say 1"],"a","abc\\xc\\")
+        >>> 等价于 WriteFunction("abc/xc/test",["say 1"])
         
         将在 {数据包}\\{命名空间}\\functions\\abc\\xc\\test 中 写入 say 1
     """
@@ -79,6 +86,9 @@ def checkBlock(Pos:list=None,BlockId:str=None) -> bool:
         example:
         >>> checkBlock("0 0 0","minecraft:air")
     """
+
+
+
 
 ## 工具 类
 
@@ -159,4 +169,17 @@ class MCEntity:
 
 class _():
     air_block="minecraft:air"
- 
+    glass="minecraft:glass"
+
+
+class event():
+    '''监听事件\n当对应事件触发时，调用函数'''
+
+    def ifEntytPosDownZero(entity:"MCEntity")->Callable:
+        '''当指定实体坐标在零格以下时触发'''
+        def inner(func:Callable)->Callable:
+            def wrapper(*args,**kwargs):
+                func(*args,**kwargs)
+            return wrapper
+        return inner
+
