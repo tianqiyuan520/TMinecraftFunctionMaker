@@ -5,33 +5,47 @@ import shutil
 from read_config import read_json
 D_PATH = ''
 D_NAME = ''
+Pathtime = 0
 from Parser import Parser
 
 class TMCFM:
-    def __init__(self,content):
+    def __init__(self,content,time):
         # print('init...')
         self.content = content
+        global Pathtime
+        Pathtime = time
         self.init_datapack()
         # print('content: \n',content)
         # print('init success')
     def init_datapack(self):
         '''初始化数据包文件'''
+        global Pathtime
         try:
             cfg = read_json.read('config.json')['config']
             #重置 整个数据包
-            if (cfg["is_rebuild"]) and os.path.exists(cfg['path']):
+            if (cfg["is_rebuild"]) and os.path.exists(cfg['path'][Pathtime]):
                 # os.remove()
-                shutil.rmtree(cfg["path"])
+                shutil.rmtree(cfg['path'][Pathtime])
 
-            PATH = cfg['path'] # 项目地址
+            PATH = cfg['path'][Pathtime] # 项目地址
             global D_NAME
-            D_NAME = cfg['path'] # 项目名称
-            folder = os.path.exists(PATH)
-            if not folder:
-                os.makedirs(PATH)
-            folder = os.path.exists(PATH+'data')
-            if not folder:
-                os.makedirs(PATH+'data')
+            D_NAME = cfg['path'][Pathtime] # 项目名称
+            if not os.path.exists(PATH):
+                try:
+                    os.makedirs(PATH)
+                except:
+                    try:
+                        os.makedirs(PATH)
+                    except:
+                        ...
+            if not os.path.exists(PATH+'data'):
+                try:
+                    os.makedirs(PATH+'data')
+                except:
+                    try:
+                        os.makedirs(PATH+'data')
+                    except:
+                        ...
             description = cfg['description'] if isinstance(cfg['description'],list) else "\"" + str(cfg['description']) + "\""
             f = open(PATH + 'pack.mcmeta','w',encoding='utf-8')
             f.write(
@@ -40,9 +54,9 @@ class TMCFM:
         "pack_format": {cfg['pack_format']},
         "description": {description}
     }}
-    }}''')
+}}''')
             f.close()
-            PATH = cfg['path']+'data\\' # 项目地址
+            PATH = cfg['path'][Pathtime]+'data\\' # 项目地址
             folder = os.path.exists(PATH+cfg['name'])
             if not folder:
                 os.makedirs(PATH+cfg['name'])

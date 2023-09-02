@@ -1,3 +1,4 @@
+'''有关mc内置的函数'''
 import json
 from typing import Callable
 
@@ -167,12 +168,12 @@ class MCEntity:
         return 0.0
 
 
-class _():
+class _:
     air_block="minecraft:air"
     glass="minecraft:glass"
 
 
-class event():
+class event:
     '''监听事件\n当对应事件触发时，调用函数'''
 
     def ifEntytPosDownZero(entity:"MCEntity")->Callable:
@@ -183,3 +184,34 @@ class event():
             return wrapper
         return inner
 
+class exec:
+    '''执行器(等价于execute ... run)\n当调用该函数时，前缀修饰器'''
+
+    def AS(entity:"MCEntity"):
+        '''execute as'''
+        def inner(func:Callable)->Callable:
+            def wrapper(*args,**kwargs)->Callable:
+                func(*args,**kwargs)
+            return wrapper
+        return inner
+    def AT(entity:"MCEntity"):
+        '''execute at'''
+        def inner(func:Callable)->Callable:
+            def wrapper(*args,**kwargs)->Callable:
+                func(*args,**kwargs)
+            return wrapper
+        return inner
+
+def tag(functionName:str,namespcae="minecraft"):
+        '''函数标签\n\n将该函数添加到对应的标签\n\n默认命名空间为minecraft'''
+        def inner(func:Callable)->Callable:
+            def wrapper(*args,**kwargs)->Callable:
+                func(*args,**kwargs)
+            return wrapper
+        return inner
+
+def cache(func):
+        '''缓存函数'''
+        def wrapper(*args,**kwargs)->Callable:
+            return func(*args,**kwargs)
+        return wrapper

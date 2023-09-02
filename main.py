@@ -1,8 +1,12 @@
 ##TMCFM编译器
 ##将类似python的语言转化为Minecraft数据包
+# -*- encoding: utf-8 -*-
 '''
-author:天起源
+@File    :   main.py
+@Time    :   2023/5/17
+@Author  :   tianqiyuan520
 '''
+
 import ast
 from TMCFM import TMCFM
 from read_config import read_json
@@ -33,9 +37,10 @@ if __name__ == "__main__":
     #ast show
     code_ = ast.parse(content)
     print(ast.dump(code_))
-
-    comp = TMCFM(content)
-    comp.main()
+    cfg = read_json.read('config.json')['config']
+    for i in range(len(cfg["path"])):
+        comp = TMCFM(content,i)
+        comp.main()
     
     print("success")
     # input(">>> ")

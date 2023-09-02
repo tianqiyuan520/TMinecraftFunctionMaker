@@ -1,10 +1,16 @@
+# from functools import cache
 import system.t_algorithm_lib as t_algorithm_lib
 import system.mc as mc
 # #
-mc.NewFunction('load')
-mc.WriteFunction('load',["say 重载完成222","playsound minecraft:block.anvil.land voice @a ~ ~ ~ 2 2"])
-mc.newTags("load","minecraft",["test:load"],"functions")
-mc.newTags("tick","minecraft",["test:tick"],"functions")
+# mc.NewFunction('load')
+# mc.WriteFunction('load',["say 重载完成222","playsound minecraft:block.anvil.land voice @a ~ ~ ~ 2 2"])
+# mc.newTags("load","minecraft",["test:load"],"functions")
+
+@mc.tag("load")
+def reload():
+    print("重载完成")
+
+# mc.newTags("tick","minecraft",["test:tick"],"functions")
 
 # class aa:
 #     def __init__(self,*args) -> None:
@@ -13,7 +19,7 @@ mc.newTags("tick","minecraft",["test:tick"],"functions")
 #         self.x = x
 #         return self
 
-#     def fib(self,n):
+#     def fib(self,n)->"int":
 #         if n <= 2:
 #             return 1
 #         else:
@@ -51,9 +57,21 @@ mc.newTags("tick","minecraft",["test:tick"],"functions")
 # print(a)
 # a = (1==1 and 1==1)
 
-def test():
-    i = 0
-    while i < 10:
-        mc.run(['say ',str(i)])
-        i += 1
-test()
+# def test():
+#     i = 0
+#     while i < 10:
+#         mc.run(['say ',str(i)])
+#         i += 1
+# test()
+
+
+# @mc.cache
+# def aa():
+#     return 3
+
+# class aa:
+#     def test(self) ->"bb":
+#         return bb()
+# class bb:
+#     ...
+# a = aa().test()

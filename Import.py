@@ -4,7 +4,7 @@ import re
 import ast
 import os
 from read_config import read_json
-from model.mcf_storage_editor import Storage_editor
+from model.mcf_modifier import mcf_modifier
 from model.mc_nbt import MCStorage,RawJsonText,IntArray,MCNbt
 from model.uuid_generator import get_uuid,uuid_to_list
 

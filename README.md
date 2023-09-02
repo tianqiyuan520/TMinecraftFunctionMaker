@@ -14,7 +14,7 @@ a compiler that compiles python code into Minecraft datapack functions
 
 InputFile: 要编译的代码文件
 
-path: 数据包地址
+path: 数据包地址(列表)
 
 name: 数据包命名空间
 
@@ -41,7 +41,7 @@ print(1)
 
 #### 第三 运行数据包
 
-将数据包放入游戏，并运行/function {你的命名空间}:load/_start
+将数据包放入游戏，并运行/function {你的命名空间}:\_\_main\_\_/_start
 
 ### 额外的话
 
@@ -54,7 +54,7 @@ a=1
 print(1)
 ```
 
-将会编译在 数据包函数中： {你的命名空间}:load/_start
+将会编译在 数据包函数中： {你的命名空间}:\_\_main\_\_/_start
 
 ```python
 a = 3
@@ -62,9 +62,9 @@ def a():
     return b
 ```
 
-将会编译在 数据包函数中： {你的命名空间}:load/_start 和 {你的命名空间}:a/_start
+将会编译在 数据包函数中： {你的命名空间}:\_\_main\_\_/_start 和 {你的命名空间}:a/_start
 
-其中load就是默认的函数位置
+其中\_\_main\_\_就是默认的函数位置
 
 #### 编译规则
 
