@@ -1,5 +1,7 @@
 # TMinecraftFunctionMaker
 
+![image](封面.png)
+
 a compiler that compiles python code into Minecraft datapack functions
 
 ## Chinese
