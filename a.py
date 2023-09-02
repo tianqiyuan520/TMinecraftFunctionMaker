@@ -8,7 +8,11 @@ import system.mc as mc
 
 @mc.tag("load")
 def reload():
+    '''数据包重新加载时触发
+    '''
     print("重载完成")
+
+# t_algorithm_lib.example(3)
 
 # mc.newTags("tick","minecraft",["test:tick"],"functions")
 
@@ -64,7 +68,6 @@ def reload():
 #         i += 1
 # test()
 
-
 # @mc.cache
 # def aa():
 #     return 3
@@ -75,3 +78,20 @@ def reload():
 # class bb:
 #     ...
 # a = aa().test()
+
+
+class vector:
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+    def __add__(self,other)->"vector":
+        return vector(self.a+other.a, self.b+other.b)
+    def __sub__(self,other)->"vector":
+        return vector(self.a-other.a, self.b-other.b)
+    def __mul__(self,other)->"vector":
+        return vector(self.a*other.a, self.b*other.b)
+
+v1 = vector(2,10)
+v2 = vector(4,5)
+v3 = ((v2 - v1)+v1) * v2
+print(v3.a,v3.b)

@@ -219,6 +219,7 @@ class py_modifier(mcf_modifier):
                 return None
     # 获取该类方法的信息
     def get_class_function_info(self,key,key2,*args,**kwargs):
+        '''key类名，key2方法名'''
         for i in range(len(self.main_tree[0]["class_list"])):
             if self.main_tree[0]["class_list"][i]["id"] == key:
                 for j in range(len(self.main_tree[0]["class_list"][i]["functions"])):
@@ -248,6 +249,7 @@ class py_modifier(mcf_modifier):
         if isinstance(item,float):
             return "float"
         elif isinstance(item,str):
+            # 判断是否自定义类
             if self.py_check_class_exist(item):
                 return item
             return "str"
@@ -260,4 +262,7 @@ class py_modifier(mcf_modifier):
             except:
                 ...
             return None
-
+    # 判断是否为基本类型
+    def check_basic_type(self,item:str)->bool:
+        if item in ["int","float","str","list"]: return True
+        return False

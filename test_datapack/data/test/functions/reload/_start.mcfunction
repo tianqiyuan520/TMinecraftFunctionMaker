@@ -1,5 +1,8 @@
+#数据包重新加载时触发
+#    
 ##函数参数初始化
 ##函数主体
+data remove storage test:system main_tree[-1].call_list[-1]
 
 ##    调用函数
 #参数处理

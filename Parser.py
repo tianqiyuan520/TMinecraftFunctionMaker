@@ -181,16 +181,19 @@ class Parser(py_modifier):
             tree.value = self.BinOp(tree.value,tree.value.op,func,index,index,**kwargs)
             for i in tree.targets:
                 if isinstance(i,ast.Name):
+                    print(tree.value.kind)
                     self.py_change_value(i.id,tree.value.value,False,func,False,index,**kwargs)
-                    self.py_change_value_type(i.id,tree.value.value,index,True,True,func,**kwargs)
                     if (tree.value.kind == None):
+                        self.py_change_value_type(i.id,tree.value.value,index,True,True,func,**kwargs)
                         self.mcf_add_exp_operation(tree.value.value,func,index)
+                    else:
+                        self.py_change_value_type(i.id,tree.value.kind[1],index,True,True,func,**kwargs)
                     self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{i.id}"}}].value set from storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1].value\n',**kwargs)
                 elif isinstance(i,ast.Attribute):
                     ClassC = ClassCall(self.main_tree,**kwargs)
                     StoragePath = ClassC.class_var_to_str(i,func,**kwargs)
                     self.mcf_modify_value_by_from(f'{StoragePath}','set',f'storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1].value',func,**kwargs)
-                    ClassC.modify_class_var(i,func,tree.value)
+                    ClassC.modify_class_var(i,func,tree.value,**kwargs)
             self.mcf_remove_Last_exp_operation(func,**kwargs)
         elif isinstance(tree.value,ast.Constant):
             # 常数赋值
@@ -213,7 +216,7 @@ class Parser(py_modifier):
                     ClassC = ClassCall(self.main_tree,**kwargs)
                     StoragePath = ClassC.class_var_to_str(i,func,**kwargs)
                     self.mcf_modify_value_by_from(f'{StoragePath}','set',f'storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{tree.value.id}"}}].value',func,**kwargs)
-                    ClassC.modify_class_var(i,func,self.py_get_value(tree.value.id,func,**kwargs))
+                    ClassC.modify_class_var(i,func,self.py_get_value(tree.value.id,func,**kwargs),**kwargs)
         elif isinstance(tree.value,ast.Subscript):
             # 切片赋值
             value = 0
@@ -348,7 +351,7 @@ class Parser(py_modifier):
         '''带有类型注释的赋值'''
         # tree.annotation
         self.Assign(ast.Assign(targets=[tree.target],value=tree.value),func,index)
-        self.py_change_value_type(tree.target.id,tree.annotation.id,-1,False,True,func)
+        self.py_change_value_type(tree.target.id,tree.annotation.id,-1,False,True,func,**kwargs)
 # 增强分配
     def AugAssign(self,tree:ast.AugAssign,func:str,index:-1,*args,**kwargs):
         '''变量 赋值操作 += -= /= *='''
@@ -436,7 +439,7 @@ class Parser(py_modifier):
                 value = self.py_get_value(tree_list[item].id,func,index,**kwargs)
                 # self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].exp_operation','append',{"value":0,"type":"num"},func,**kwargs)
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].exp_operation','append',f'storage {defualt_STORAGE} main_tree[-1].data[{{"id":"{tree_list[item].id}"}}]',func,**kwargs)
-                tree_list[item] = ast.Constant(value=value, kind=["is_v",self.py_get_type(tree_list[item].id,index)])
+                tree_list[item] = ast.Constant(value=value, kind=["is_v",self.py_get_type(tree_list[item].id,index),tree_list[item].id,tree_list[item]])
             # 假如为函数返回值
             elif isinstance(tree_list[item],ast.Call):
                 # 函数返回值 赋值
@@ -452,11 +455,13 @@ class Parser(py_modifier):
                 value = 0
                 tree_list[item] = ast.Constant(value=value, kind=["is_call",None])
             elif isinstance(tree_list[item],ast.Attribute):
-                # 函数返回值 赋值
-                value = self.Expr(ast.Expr(value=tree_list[item]),func,-1,**kwargs)
+                # 属性
+                ClassC = ClassCall(self.main_tree,**kwargs)
+                StoragePath = ClassC.class_var_to_str(tree_list[item],func,**kwargs)
+                value = ClassC.get_class_var(tree_list[item],func,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].exp_operation','append',StoragePath[0:-6],func,**kwargs)
                 # self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].exp_operation','append',{"value":0,"type":"num"},func,**kwargs)
-                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].exp_operation','append',f'storage {defualt_STORAGE} main_tree[-1].return[-1]',func,**kwargs)
-                tree_list[item] = ast.Constant(value=value[0], kind=["is_v",value[1]])
+                tree_list[item] = ast.Constant(value=value.get('value'), kind=["is_v",value.get('type')])
         tree.left,tree.right = (tree_list[0],tree_list[1])
         # 常量处理
         if isinstance(tree.left,ast.Constant) and isinstance(tree.right,ast.Constant):
@@ -494,7 +499,24 @@ class Parser(py_modifier):
                 value = self.get_operation(tree.left.value,tree.right.value,op,func,**kwargs)
                 type1 = tree.left.kind[1] if tree.left.kind != None else self.check_type(tree.left.value)
                 type2 = tree.right.kind[1] if tree.right.kind != None else self.check_type(tree.right.value)
-                
+                # 魔术方法
+                if not self.check_basic_type(type1):
+                    sign = None
+                    if isinstance(op,ast.Add) and self.get_class_function_info(type1,"__add__"): sign = '__add__'
+                    if isinstance(op,ast.Sub) and self.get_class_function_info(type1,"__sub__"): sign = '__sub__'
+                    if isinstance(op,ast.Mult) and self.get_class_function_info(type1,"__mul__"): sign = '__mul__'
+                    if isinstance(op,ast.Div) and self.get_class_function_info(type1,"__truediv__"): sign = '__truediv__'
+                    def call():
+                        mmh = MagicMethodHandler(self.main_tree)
+                        # 传参
+                        inputArgs = [
+                            f"storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1]"
+                            ]
+                        value = mmh.main(None,tree.left.kind[1],sign,func,inputArgs,storage=f"storage {defualt_STORAGE} main_tree[{index-1}].exp_operation[-2].value",**kwargs)
+                        self.write_file(func,f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1] set from storage {defualt_STORAGE} main_tree[{index}].return[-1]\n''',**kwargs)
+                        self.write_file(func,f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[{index}].exp_operation[-2]\n''',**kwargs)
+                        return ast.Constant(value=value[0], kind=['is_v',value[1],None])
+                    if sign != None: return call()
                 self.mcf_change_exp_operation(op,func,index,type1,type2,**kwargs)
                 return ast.Constant(value=value, kind=['is_v',self.check_type(value)])
 # 函数定义
@@ -530,11 +552,17 @@ class Parser(py_modifier):
         if self.get_func_info(kwargs.get("ClassName"),func,**kwargs).get("cached"):
             f2 = "_start2"
         
+        # 函数注解
+        if tree.body and \
+            (isinstance(tree.body[0],ast.Expr) and
+            isinstance(tree.body[0].value,ast.Constant) and
+            isinstance(tree.body[0].value.value,str)):
+                for i in tree.body[0].value.value.split("\n"):
+                    self.write_file(func,f'#{i}\n',f2='_start',**kwargs)
 
         #函数参数初始化
         self.write_file(func,f'##函数参数初始化\n',f2=f2,**kwargs)
         self.FunctionDef_args_init(tree.args,args_list,func,index,f2=f2,**kwargs)
-        
         #
 
         
@@ -660,7 +688,7 @@ class Parser(py_modifier):
                     self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].call_list','append',[],func,**kwargs)
                     self.main_tree[-1]["call_list"] = []
                     #位置传参
-                    for i in range( len(Call.args)):
+                    for i in range(len(Call.args)):
                         self.Expr_set_value(ast.Assign(targets=[ast.Name(id=None)],value=Call.args[i]),func,**kwargs)
                     #关键字传参
                     for i in range(len(Call.keywords)):
@@ -707,19 +735,36 @@ class Parser(py_modifier):
             self.mcf_new_stack(func,**kwargs)
             x = [None,None]
             if not isinstance(Call.value,ast.Call):
+                x = [None,None]
                 
-                ClassC = ClassCall(self.main_tree,**kwargs)
-                StoragePath = ClassC.class_var_to_str(Call,func,**kwargs)
-                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].return','append',{"value":0,"type":"num"},func,**kwargs)
-                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].return[-1].value','set',f'{StoragePath}',func,**kwargs)
+                try:
+                    Handler = TypeAttributeHandler(
+                        self.main_tree,
+                        self.py_get_value(Call.value.id,-1,**kwargs),
+                        self.py_get_type(Call.value.id,-1,**kwargs),Call.attr,None,False
+                        )
+                    x = Handler.main(func,True,**kwargs)
+                except:
+                    ...
+                
+                if x == [None,None]:
+                    ClassC = ClassCall(self.main_tree,**kwargs)
+                    StoragePath = ClassC.class_var_to_str(Call,func,**kwargs)
+                    self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].return','append',{"value":0,"type":"num"},func,**kwargs)
+                    self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].return[-1].value','set',f'{StoragePath}',func,**kwargs)
+                else:
+                    
+                    self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].return','append',{"value":x[0],"type":f"{x[1]}"},func,**kwargs)
             else:
                 x:list = self.AttributeHandler(Call,func,True,**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].return','append',{"value":0,"type":"num"},func,**kwargs)
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].return[-1].value','set',f'{x[1].replace("return[-1]","return[-2]")}',func,**kwargs)
             # self.mcf_remove_stack_data(func,**kwargs)
             self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[-1].call_list[-1]\n',**kwargs)
+            # self.mcf_remove_stack_data(func,**kwargs)
             return x
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[-1].call_list[-1]\n',**kwargs)
+        
         return [None,None]
 # 调用函数时 参数处理器
     def Expr_set_value(self,tree:ast.Assign,func,loopTime=0,*args,**kwargs):
@@ -1924,7 +1969,7 @@ class System_function(Parser):
                 classList.append(i.value)
             elif isinstance(i,ast.Name):
                 classList.append(i.id)
-        print("storage",storage)
+        
         self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.t {scoreboard_objective} {len(classList)}\n',**kwargs)
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-2].temp set value {classList}\n',**kwargs)
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 store result score #{defualt_STORAGE}.stack.t2 {scoreboard_objective} run data modify storage {defualt_STORAGE} main_tree[-2].temp[] set from {storage}\n',**kwargs)
@@ -2083,9 +2128,9 @@ class ClassCall(Parser):
                 self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-2].return append value {{"value":0}}\ndata modify storage {defualt_STORAGE} main_tree[-2].return[-1].value set from storage {defualt_STORAGE} main_tree[-1].data[{{"id":"self"}}].value\n',**kwargs)
                 return [[],self.class_name]
         return [None,None]
-    def main(self,var_name,class_name,call_name,IsCallFunc,func,storage,*args,**kwargs) -> bool:
+    def main(self,var_name,class_name,call_name,IsCallFunc,func,storage,*args,**kwargs) -> list:
         # print(var_name,class_name,call_name,IsCallFunc)
-        '''属性调用
+        '''属性调用/方法调用
         var_name 变量名称 class_name 类名称 call_name 调用的名称 IsCallFunc 是否为调用函数
         '''
         if var_name == "self":
@@ -2094,7 +2139,6 @@ class ClassCall(Parser):
         if IsCallFunc:
             for item in self.main_tree[0]["class_list"]:
                 if item['id'] == class_name:
-                    
                     for item2 in item['functions']:
                         if item2['id'] == call_name:
                             self.write_file(func,f'#参数处理.赋值\n',**kwargs)
@@ -2167,6 +2211,7 @@ class ClassCall(Parser):
         temp["value"] = value
         temp["type"] = self.check_type(value)
         StoragePath = self.class_var_to_str(tree,func,**kwargs)
+        
         self.mcf_modify_value_by_value(f'{StoragePath[0:-5]}type','set',self.check_type(value),func,**kwargs)
 
 
@@ -2179,16 +2224,16 @@ class ClassCall(Parser):
         if isinstance(tree.value,ast.Attribute):
             x = self.get_class_var(tree.value,func,**kwargs)
             for j in x["value"]:
-                if j['id'] == tree.attr:
+                if j.get("id") == tree.attr:
                     return j
             x["value"].append({"id":tree.attr,"value":[],"type":None})
             return x["value"][-1]
 
         elif isinstance(tree.value,ast.Name):
             for i in self.main_tree[-1]['data']:
-                if i['id'] == tree.value.id:
+                if i.get('id') == tree.value.id:
                     for j in i['value']:
-                        if j['id'] == tree.attr:
+                        if j.get('id') == tree.attr:
                             return j
                     i['value'].append({"id":tree.attr,"value":[]})
                     return i['value'][-1]
@@ -2220,7 +2265,7 @@ class TypeAttributeHandler(Parser):
             for item in arg.elts:
                 self.main_tree[-1]["list_handler"].append(self.get_value(item))
             return self.main_tree[-1]["list_handler"]
-    def main(self,func,**kwargs):
+    def main(self,func,IsInbuilt=False,**kwargs):
         # 类型:
         #       变量,
         #       函数
@@ -2228,15 +2273,16 @@ class TypeAttributeHandler(Parser):
         # 系统内置类
         if self.type == "str":
             if not self.IsCallFunc:
-                if self.attr == "hash":
-                    return [self.Value.__hash__(),"int"]
+                if self.attr == "__hash__":
+                    return [self.Value.__hash__()%2147483647,"int"]
             else:
                 if self.attr == "replace":
                     return [self.Value.replace(self.get_value(self.main_tree[-1]["call_list"][0]),self.get_value(self.main_tree[-1]["call_list"][1])),"str"]
         if self.type == "list":
             if not self.IsCallFunc:
+                
                 if self.attr == "hash":
-                    return [self.Value.__hash__(),"int"]
+                    return [self.Value.__hash__()%2147483647,"int"]
             else:
                 if self.attr == "append":
                     self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {self.storage} append from storage {defualt_STORAGE} main_tree[-1].call_list[-1][-1].value\n',**kwargs)
@@ -2256,7 +2302,7 @@ class TypeAttributeHandler(Parser):
                             return [self.Value.pop(0),"list"]
                         return [self.Value,"list"]
         # 自定义的类
-        else:
+        elif not IsInbuilt:
             # if not self.IsCallFunc:
             
             ClassC = ClassCall(self.main_tree,self.type,**kwargs)
@@ -2452,7 +2498,74 @@ class CacheHandler(DecoratoHandler):
         # self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].dync','set',{},callFunctionName,**kwargs)
         return self.main_tree
 
+# 魔术方法处理器
+class MagicMethodHandler(ClassCall):
+    def __init__(self,main_tree,*args,**kwargs) -> None:
+        self.main_tree = main_tree
+    
+    def addArgs(self,inputArgs,func,*args,**kwargs):
+        '''参数添加'''
+        self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].call_list','append',[],func,**kwargs)
+        for i in inputArgs:
+                    self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].call_list[-1]','append',i,func,**kwargs)
 
 
-
-
+    def main(self,var_name,class_name,call_name,func,inputArgs=None,storage=None,*args,**kwargs) -> list:
+        # print(var_name,class_name,call_name,IsCallFunc)
+        '''属性调用/方法调用
+        var_name 变量名称 class_name 类名称 call_name 调用的名称 IsCallFunc 是否为调用函数
+        '''
+        if var_name == "self":
+            class_name = kwargs["ClassName"]  
+        
+        for item in self.main_tree[0]["class_list"]:
+            if item['id'] == class_name:
+                for item2 in item['functions']:
+                    if item2['id'] == call_name:
+                        # self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].call_list','append',[],func,**kwargs)
+                        self.addArgs(inputArgs,func,*args,**kwargs)
+                        self.mcf_new_stack(func,**kwargs)
+                        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].call_list','set',f'storage {defualt_STORAGE} main_tree[-2].call_list',func,**kwargs)
+                        self.write_file(func,f'#魔术方法-参数处理.赋值\n',**kwargs)
+                        
+                        ##判断参数是否含 self
+                        IsHaveSelf = False
+                        ##
+                        #skip self 跳过self
+                        shift = 0
+                        for i in range(len(item2['args'])):
+                            id = item2['args'][i]
+                            if not id == "self":
+                                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data[{{"id":"{id}"}}].value set from storage {defualt_STORAGE} main_tree[-1].call_list[-1][{i-shift}].value\n',**kwargs)
+                            else:
+                                # 遇到 self变量
+                                if var_name != None:
+                                    # 如果有指定的 var_name
+                                    self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data[{{"id":"self"}}].value set from storage {defualt_STORAGE} main_tree[-1].data[{{"id":"{var_name}"}}].value\n',**kwargs)
+                                # 如果没有则可能为方法调用方法，可能为链性函数
+                                else:
+                                    if storage == None:
+                                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data[{{"id":"self"}}].value set from storage {defualt_STORAGE} main_tree[-1].return[-1].value\n',**kwargs)
+                                    else:
+                                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data[{{"id":"self"}}].value set from {storage}\n',**kwargs)
+                                shift += 1
+                                IsHaveSelf = True
+                        
+                        self.write_file(func,f'\n#魔术方法-调用\n',**kwargs)
+                        
+                        className =  item['id'] if item2['from'] == None else item2['from']
+                        getprefix = self.get_func_info(className,item2['id'],**kwargs).get("prefix")
+                        prefix = f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run "+getprefix if getprefix != None else f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run "
+                        kwargs_ = copy.deepcopy(kwargs)
+                        # if kwargs_.get("ClassName"):
+                            # kwargs_.pop("ClassName")
+                        self.mcf_call_function(f'{defualt_NAME}:{className}/{item2["id"]}/_start',func,isCustom=True,prefix=prefix,**kwargs_)
+                        if IsHaveSelf:
+                            ## 重新修改变量self的值
+                            if var_name != None:
+                                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data[{{"id":"{var_name}"}}].value set from storage {defualt_STORAGE} main_tree[-1].data[{{"id":"self"}}].value\n',**kwargs)
+                            elif storage != None:
+                                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage} set from storage {defualt_STORAGE} main_tree[-1].data[{{"id":"self"}}].value\n',**kwargs)
+                        self.mcf_remove_stack_data(func,**kwargs)
+                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[-1].call_list[-1]\n',**kwargs)
+                        return [[],item2['type']]

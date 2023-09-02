@@ -51,8 +51,9 @@ class editor_file:
         try:
             if self.main_tree[-1]['Is_code_have_end'] == False and self.main_tree[-1]["In_loop"] == False:
                 text = text.replace(f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ","")
-            else:
-                text = f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ' + text
+                
+            # elif text[0] != "#":
+                # text = f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ' + text
         except:
             ...
         func2 = '_start'
