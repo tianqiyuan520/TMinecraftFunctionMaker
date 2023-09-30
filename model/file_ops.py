@@ -49,7 +49,7 @@ class editor_file:
         '''读写函数 f2为函数详细名称,p为函数的相对位置'''
         
         try:
-            if self.main_tree[-1]['Is_code_have_end'] == False and self.main_tree[-1]["In_loop"] == False:
+            if self.stack_frame[-1]['Is_code_have_end'] == False and self.stack_frame[-1]["In_loop"] == False:
                 text = text.replace(f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ","")
                 
             # elif text[0] != "#":

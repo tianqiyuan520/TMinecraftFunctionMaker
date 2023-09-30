@@ -11,11 +11,11 @@ from model.file_ops import editor_file
 
 class py_modifier(mcf_modifier):
     def __init__(self):
-        self.main_tree = []
+        self.stack_frame = []
         # 添加栈 *
     def py_append_tree(self):
         '''新建堆栈值'''
-        self.main_tree.append({"data":[],"is_break":0,"is_continue":0,"return":[],"type":"","is_return":0,"is_end":0,"exp_operation":[],"functions":[],"BoolOpTime":0,"condition_time":0,"elif_time":0,"while_time":0,"for_time":0,"call_list":[],"list_handler":[],"class_list":[],"record_condition":[],"eventCounter":0,"Is_code_have_end":False,"In_loop":False,"dync":0})
+        self.stack_frame.append({"data":[],"is_break":0,"is_continue":0,"return":[],"type":"","is_return":0,"is_end":0,"exp_operation":[],"functions":[],"BoolOpTime":0,"condition_time":0,"elif_time":0,"while_time":0,"for_time":0,"call_list":[],"list_handler":[],"class_list":[],"record_condition":[],"eventCounter":0,"Is_code_have_end":False,"In_loop":False,"dync":0})
         return self
     # 获取两数运算结果
     def get_operation(self,num1,num2,operation,func,*args,**kwargs):
@@ -39,28 +39,27 @@ class py_modifier(mcf_modifier):
     def py_get_var_info(self,key,arr,func=None,index=-1,*args,**kwargs):
         '''获取 变量信息'''
         for i in arr:
-            
             if i["id"] == key:
                 return i
         return None
 
     def py_get_value(self,key,func=None,index=-1,*args,**kwargs):
         '''获取py记录的堆栈值 变量值'''
-        for i in self.main_tree[index]["data"]:
+        for i in self.stack_frame[index]["data"]:
             if i["id"] == key:
                 return i["value"]
         #无
-        for i in self.main_tree[0]["data"]:
+        for i in self.stack_frame[0]["data"]:
             if i["id"] == key:
                 return i["value"]
         return None
     def py_get_type(self,key,index=-1,*args,**kwargs):
         '''获取py记录的堆栈值 类型'''
-        for i in self.main_tree[index]["data"]:
+        for i in self.stack_frame[index]["data"]:
             if i["id"] == key:
                 return i["type"]
         #无
-        for i in self.main_tree[0]["data"]:
+        for i in self.stack_frame[0]["data"]:
             if i["id"] == key:
                 return i["type"]
         return None
@@ -78,12 +77,12 @@ class py_modifier(mcf_modifier):
     # 判断该变量是否为全局变量
     def py_get_value_global(self,key,func:str,index:-1,*args,**kwargs) -> bool:
         '''获取py记录的堆栈值 变量是否为全局变量'''
-        for i in self.main_tree[index]["data"]:
+        for i in self.stack_frame[index]["data"]:
             if i["id"] == key:
                 if i.get("is_global")!=None:
                     return i["is_global"]
         #无
-        for i in self.main_tree[0]["data"]:
+        for i in self.stack_frame[0]["data"]:
             if i["id"] == key:
                 return True
     # 常量 修改 变量
@@ -91,23 +90,23 @@ class py_modifier(mcf_modifier):
         '''
         修改py记录的堆栈值
         常量修改
-        isfundef 是否为函数的定义
+        isfundef 是否为函数的参数定义
         '''
         NO_exist = True
         is_global = False
-        for i in self.main_tree[index]["data"]:
+        for i in self.stack_frame[index]["data"]:
             if i["id"] == key:
                 i["value"] = value
                 NO_exist = False
                 if(i.get("is_global")==True):
-                    for j in self.main_tree[0]["data"]:
+                    for j in self.stack_frame[0]["data"]:
                         if j["id"] == key:
                             j["value"] = value
                             is_global = True
                 else:
                     i["is_global"] = False
         if NO_exist:
-            self.main_tree[index]["data"].append({"id":key,"value":value,"type":None,"is_global":False})
+            self.stack_frame[index]["data"].append({"id":key,"value":value,"type":None,"is_global":False})
         if(call_mcf):
             self.mcf_change_value(key,value,is_global,func,isfundef,index,newType,*args,**kwargs)
         return self
@@ -121,17 +120,17 @@ class py_modifier(mcf_modifier):
         value = self.py_get_value(key2,func,index)
         NO_exist = True
         is_global = False
-        for i in self.main_tree[index]["data"]:
+        for i in self.stack_frame[index]["data"]:
             if i["id"] == key:
                 i["value"] = value
                 NO_exist = False
                 if(i["is_global"]):
-                    for j in self.main_tree[0]["data"]:
+                    for j in self.stack_frame[0]["data"]:
                         if j["id"] == key:
                             j["value"] = value
                             is_global = True
         if NO_exist:
-            self.main_tree[index]["data"].append({"id":key,"value":value})
+            self.stack_frame[index]["data"].append({"id":key,"value":value})
         self.mcf_change_value2(key,key2,is_global,func,isfundef,index,index,newType,*args,**kwargs)
     # 修改变量的 类型
     def py_change_value_type(self,key,type:str,index=-1,type_check=True,IsChangeMcfData=False,func="",**kwargs):
@@ -142,21 +141,21 @@ class py_modifier(mcf_modifier):
         value = type
         if type_check:
             value = self.check_type(type)
-        for i in self.main_tree[index]["data"]:
+        for i in self.stack_frame[index]["data"]:
             if i["id"] == key:
                 i["type"] = value
                 if(i.get("is_global")==True):
-                    for j in self.main_tree[0]["data"]:
+                    for j in self.stack_frame[0]["data"]:
                         if j["id"] == key:
                             i["type"] = value
                 else:
                     i["is_global"] = False
         if IsChangeMcfData:
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}"}}].type set value "{value}"\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].type set value "{value}"\n',**kwargs)
         return self
     # 函数调用参数列表 增加
     def py_call_list_append(self,index:int,value:dict,*args,**kwargs):
-        self.main_tree[index]["call_list"].append(value)
+        self.stack_frame[index]["call_list"].append(value)
     # 获取函数的参数列表
     def get_function_args(self,key,*args,**kwargs) ->list:
         '''获取函数 参数列表'''
@@ -182,7 +181,7 @@ class py_modifier(mcf_modifier):
         return False
     # 获取该函数的信息
     def get_function_info(self,key,*args,**kwargs):
-        for i in self.main_tree[0]["functions"]:
+        for i in self.stack_frame[0]["functions"]:
             if i["id"] == key:
                 return i
         return None
@@ -190,14 +189,14 @@ class py_modifier(mcf_modifier):
     # 获取class记录的函数列表
     def py_get_class_functions(self,key)->list:
         '''获取py记录的堆栈中 class定义'''
-        for i in self.main_tree[0]["class_list"]:
+        for i in self.stack_frame[0]["class_list"]:
             if i["id"] == key:
                 return i["functions"]
         return None
     # 判断是否定义过该class
     def py_check_class_exist(self,key)->bool:
         '''获取py记录的堆栈中 class是否定义过'''
-        for i in self.main_tree[0]["class_list"]:
+        for i in self.stack_frame[0]["class_list"]:
             if i["id"] == key:
                 return True
         return False
@@ -208,23 +207,23 @@ class py_modifier(mcf_modifier):
         - value 为 [函数名称,返回值类型,参数列表]
         '''
         if not self.py_check_class_exist(key):
-            self.main_tree[0]["class_list"].append({"id":key,"functions":[]})
-        for i in range(len(self.main_tree[0]["class_list"])):
-            if self.main_tree[0]["class_list"][i]["id"] == key:
-                for j in range(len(self.main_tree[0]["class_list"][i]["functions"])):
-                    if self.main_tree[0]["class_list"][i]["functions"][j]["id"] == value[0]:
-                        self.main_tree[0]["class_list"][i]["functions"][j] = {"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""}
+            self.stack_frame[0]["class_list"].append({"id":key,"functions":[]})
+        for i in range(len(self.stack_frame[0]["class_list"])):
+            if self.stack_frame[0]["class_list"][i]["id"] == key:
+                for j in range(len(self.stack_frame[0]["class_list"][i]["functions"])):
+                    if self.stack_frame[0]["class_list"][i]["functions"][j]["id"] == value[0]:
+                        self.stack_frame[0]["class_list"][i]["functions"][j] = {"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""}
                         return None
-                self.main_tree[0]["class_list"][i]["functions"].append({"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""})
+                self.stack_frame[0]["class_list"][i]["functions"].append({"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""})
                 return None
     # 获取该类方法的信息
     def get_class_function_info(self,key,key2,*args,**kwargs):
-        '''key类名，key2方法名'''
-        for i in range(len(self.main_tree[0]["class_list"])):
-            if self.main_tree[0]["class_list"][i]["id"] == key:
-                for j in range(len(self.main_tree[0]["class_list"][i]["functions"])):
-                    if self.main_tree[0]["class_list"][i]["functions"][j]["id"] == key2:
-                        return self.main_tree[0]["class_list"][i]["functions"][j]
+        '''key类名，key2方法名\n获取类下的方法信息，若不存在则返回None'''
+        for i in range(len(self.stack_frame[0]["class_list"])):
+            if self.stack_frame[0]["class_list"][i]["id"] == key:
+                for j in range(len(self.stack_frame[0]["class_list"][i]["functions"])):
+                    if self.stack_frame[0]["class_list"][i]["functions"][j]["id"] == key2:
+                        return self.stack_frame[0]["class_list"][i]["functions"][j]
         return None
     # Class 定义函数是否返回
     def GetReturnType(self,tree:ast.FunctionDef,**kwargs) -> str:

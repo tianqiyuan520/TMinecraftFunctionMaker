@@ -80,18 +80,31 @@ def reload():
 # a = aa().test()
 
 
-class vector:
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-    def __add__(self,other)->"vector":
-        return vector(self.a+other.a, self.b+other.b)
-    def __sub__(self,other)->"vector":
-        return vector(self.a-other.a, self.b-other.b)
-    def __mul__(self,other)->"vector":
-        return vector(self.a*other.a, self.b*other.b)
+# class vector:
+#     def __init__(self, a, b):
+#         self.a = a
+#         self.b = b
+#     def __add__(self,other)->"vector":
+#         return vector(self.a+other.a, self.b+other.b)
+#     def __sub__(self,other)->"vector":
+#         return vector(self.a-other.a, self.b-other.b)
+#     def __mul__(self,other)->"vector":
+#         return vector(self.a*other.a, self.b*other.b)
+#     def __str__(self) -> str:
+#         print(self.a,self.b)
+#         return "233"
+# v1 = vector(2,10)
+# v2 = vector(4,5)
+# v3 = ((v2 - v1)+v1) * v2 *v2
+# print(v3)
 
-v1 = vector(2,10)
-v2 = vector(4,5)
-v3 = ((v2 - v1)+v1) * v2
-print(v3.a,v3.b)
+
+class aa:
+    def __init__(self) -> None:
+        self.x = 0
+    def b(self)->"aa":
+        self.x += 1
+        return self
+
+a = aa()
+bb = a.b().x

@@ -76,7 +76,7 @@ class Parser:
         self.code = content
         #模拟栈 [{  "data":[{"id":"x","value":""},{...}],"is_end":0,"is_return":0,"is_break":0,"is_continue":0,"return":[{"id":"x","value":""}],"type":""  }]
         ##data为记录数据,is_return控制当前函数是否返回,is_end控制该函数是否终止,is_break控制循环是否终止,is_continue是否跳过后续的指令,return
-        self.main_tree = [{"data":[],"is_break":0,"is_continue":0,"return":[],"type":"","is_return":0,"is_end":0}]
+        self.stack_frame = [{"data":[],"is_break":0,"is_continue":0,"return":[],"type":"","is_return":0,"is_end":0}]
         self.parse()
     def parse(self):
         code = copy.deepcopy(self.code)

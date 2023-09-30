@@ -281,4 +281,5 @@ Expr(value=Attribute(
     value=Attribute(value=Call(func=Name(id='test', ctx=Load()), args=[], keywords=[]), attr='a', ctx=Load()), attr='b', ctx=Load())
     )
 
-Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='x', ctx=Load()), attr='a', ctx=Load()), attr='ax', ctx=Load()), args=[], keywords=[]))
+Expr(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='a', ctx=Load()), attr='b', ctx=Load()), args=[], keywords=[]), attr='b', ctx=Load()), args=[], keywords=[]))
+Expr(value=Attribute(value=Call(func=Attribute(value=Name(id='a', ctx=Load()), attr='b', ctx=Load()), args=[], keywords=[]), attr='x', ctx=Load()))

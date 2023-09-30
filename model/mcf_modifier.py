@@ -34,34 +34,36 @@ class mcf_modifier(editor_file):
         '''修改mcf中的堆栈值 常量修改'''
         if isinstance(value,str):
             value = "\""+str(value)+"\""
+        if newType != "":
+            newType = f',"type":"{newType}"'
         if not isfundef:
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}","type":"{newType}"}}].value set value {value}\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set value {value}\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}"{newType}}}].value set value {value}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"{newType}}}].value set value {value}\n',**kwargs)
         else:
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}"}}].value set value {value}\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value set value {value}\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}"}}].value set value {value}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value set value {value}\n',**kwargs)
 
     def mcf_change_value2(self,key,key2,is_global:False,func:str,isfundef:False,index:-1,index2:-1,newType="",*args,**kwargs):
         '''修改mcf中的堆栈值 变量修改 
         - isfundef 是否 给函数的参数初始化默认值'''
         if not isfundef:
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} main_tree[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} main_tree[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
         else:
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} main_tree[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} main_tree[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
 
     def mcf_add_exp_operation(self,value,func,index:-1,*args,**kwargs):
         '''mcf 表达式运算过程中添加值 变量添加'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[{index}].exp_operation append value {{"value":{value},"type":"num"}}\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].exp_operation append value {{"value":{value},"type":"num"}}\n',**kwargs)
 
     def mcf_add_exp_operation2(self,value,func,index:-1,index2:-1,*args,**kwargs):
         '''mcf 表达式运算过程中添加值 返回值添加'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[{index}].exp_operation append from storage {defualt_STORAGE} main_tree[-1].return[{index2}]\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].exp_operation append from storage {defualt_STORAGE} stack_frame[-1].return[{index2}]\n',**kwargs)
     ## 运算处理
     def mcf_change_exp_operation(self,operation,func,index:-1,type1,type2,*args,**kwargs):
         '''mcf 表达式运算过程中修改值 数值运算'''
@@ -86,47 +88,47 @@ class mcf_modifier(editor_file):
             scale2 = 1000
             self.mcf_operation_num(operation,func,index,scale,scale2,*args,**kwargs)
         self.write_file(func,
-        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[{index}].exp_operation[-2]
+        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-2]
 ''',**kwargs)
 
 # 主要直接修改给定的storage
     def mcf_change_value_by_operation(self,key,key2,is_global:False,op:ast.operator,func:str,index:-1,isValue=None,*args,**kwargs):
-        Storage2 = f'storage {defualt_STORAGE} main_tree[{index}].data[{{"id":{key2}}}].value'
+        Storage2 = f'storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":{key2}}}].value'
         if isValue!=None:
             Storage2 = isValue
         '修改mcf中的堆栈值 变量修改 += -= *= /=\n\nisValue判断key2是否非id'
         if isinstance(op,ast.Add):
             self.write_file(func,
-            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value 1000
+            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value 1000
 execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get {Storage2} 1000
-execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} += #{defualt_NAME}.system.temp2 {scoreboard_objective}
+execute store result storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} += #{defualt_NAME}.system.temp2 {scoreboard_objective}
 ''',**kwargs)
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
         if isinstance(op,ast.Sub):
             self.write_file(func,
-            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value 1000
-execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].data[{{"id":{key2}}}].value 1000
-execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} -= #{defualt_NAME}.system.temp2 {scoreboard_objective}
+            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value 1000
+execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":{key2}}}].value 1000
+execute store result storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} -= #{defualt_NAME}.system.temp2 {scoreboard_objective}
 ''',**kwargs)
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
         if isinstance(op,ast.Mult):
             self.write_file(func,
-            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value 1000
-execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].data[{{"id":{key2}}}].value 1000
-execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value double 0.000001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} *= #{defualt_NAME}.system.temp2 {scoreboard_objective}
+            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value 1000
+execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":{key2}}}].value 1000
+execute store result storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value double 0.000001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} *= #{defualt_NAME}.system.temp2 {scoreboard_objective}
 ''',**kwargs)
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value double 0.000001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value double 0.000001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
         if isinstance(op,ast.Div):
             self.write_file(func,
-            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value 1000000
-execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].data[{{"id":{key2}}}].value 1000
-execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} /= #{defualt_NAME}.system.temp2 {scoreboard_objective}
+            f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value 1000000
+execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":{key2}}}].value 1000
+execute store result storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} /= #{defualt_NAME}.system.temp2 {scoreboard_objective}
 ''',**kwargs)
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[0].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}"}}].value double 0.001 run scoreboard players get #{defualt_NAME}.system.temp1 {scoreboard_objective}\n',**kwargs)
         if isinstance(op,ast.Pow):
             self.write_file(func,
             f'''次方运算
@@ -149,39 +151,39 @@ execute store result storage {defualt_STORAGE} main_tree[{index}].data[{{"id":"{
             self.write_file(func,f'scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} += #{defualt_NAME}.system.temp2 {scoreboard_objective}\nexecute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {Storage3} double 0.001 run scoreboard players get #{defualt_NAME}.system.temp1\n',**kwargs)
     # 字符串间运算
     def mcf_operation_str(self,operation,func,*args,**kwargs):
-        self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} main_tree[-1].dync','set',{},func,**kwargs)
-        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].dync.arg0','set',f'storage {defualt_STORAGE} main_tree[-1].exp_operation[-2].value',func,**kwargs)
-        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].dync.arg1','set',f'storage {defualt_STORAGE} main_tree[-1].exp_operation[-1].value',func,**kwargs)
-        self.mcf_call_function(f'{func}/dync_{self.main_tree[0]["dync"]}/_start with storage {defualt_STORAGE} main_tree[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
+        self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].dync','set',{},func,**kwargs)
+        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg0','set',f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-2].value',func,**kwargs)
+        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg1','set',f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1].value',func,**kwargs)
+        self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
         self.write_file(func,f'##函数调用_end\n',**kwargs)
         # 内容
-        kwargs['p'] = f'{func}//dync_{self.main_tree[0]["dync"]}//'
+        kwargs['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
         kwargs['f2'] = f'_start'
-        self.write_file(func,f'##    动态命令\n$data modify storage {defualt_STORAGE} main_tree[-1].exp_operation[-1].value set value ',**kwargs)
+        self.write_file(func,f'##    动态命令\n$data modify storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1].value set value ',**kwargs)
         self.write_file(func,f'\'$(arg0)$(arg1)\'',**kwargs)
-        self.main_tree[0]["dync"] += 1
+        self.stack_frame[0]["dync"] += 1
     # 数字间运算
     def mcf_operation_num(self,operation,func,index,scale,scale2,*args,**kwargs):
         from math import log
         self.write_file(func,
-        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].exp_operation[-2].value {scale}
-execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1].value {scale2}
+        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-2].value {scale}
+execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value {scale2}
 ''',**kwargs)
         if isinstance(operation,ast.Add):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} += #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} += #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Sub):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} -= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} -= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Mult):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1].value double {10**(-1*round(log(scale*scale2,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} *= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale*scale2,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} *= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Div):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} main_tree[{index}].exp_operation[-2].value {scale*1000}\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} main_tree[{index}].exp_operation[-1].value double {10**(-1*round(log(scale*1000,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} /= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-2].value {scale*1000}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale*1000,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} /= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Pow):
             self.write_file(func,f'次方运算\n')
     # 列表间运算
     def mcf_operation_list(self,operation,func,*args,**kwargs):
         if isinstance(operation,ast.Add):
-            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} main_tree[-1].exp_operation[-1].value','append',f'storage {defualt_STORAGE} main_tree[-1].exp_operation[-2].value[]',func,**kwargs)
+            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1].value','append',f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-2].value[]',func,**kwargs)
 
     def mcf_change_value_by_storage(self,Storage,Storage2,func:str,*args,**kwargs):
         '''storage = storage'''
@@ -257,39 +259,39 @@ execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} r
     def mcf_new_stack(self,func,*args,**kwargs):
         '''新建栈'''
         self.write_file(func,f'#新建栈\n',**kwargs)
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree append value {{"data":[],"return":[],"exp_operation":[],"boolOPS":[],"for_list":[],"call_list":[],"call_list_":[],"list_handler":[],"dync":{{}}}}\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame append value {{"data":[],"return":[],"exp_operation":[],"boolOPS":[],"for_list":[],"call_list":[],"call_list_":[],"list_handler":[],"dync":{{}}}}\n',**kwargs)
         
     def mcf_new_stack_inherit_data(self,func,*args,**kwargs):
         '''新建的栈 继承上一个栈值的data数据'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-1].data set from storage {defualt_STORAGE} main_tree[-2].data\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[-1].data set from storage {defualt_STORAGE} stack_frame[-2].data\n',**kwargs)
 
     def mcf_old_stack_cover_data(self,func,*args,**kwargs):
         '''上一个栈 覆盖原先的data数据 ，新的data来自 新建的栈'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} main_tree[-2].data set from storage {defualt_STORAGE} main_tree[-1].data\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[-2].data set from storage {defualt_STORAGE} stack_frame[-1].data\n',**kwargs)
     def mcf_remove_stack_data(self,func:str,*args,**kwargs):
         '''出栈'''
-        self.write_file(func,f'data remove storage {defualt_STORAGE} main_tree[-1]\n',**kwargs)
+        self.write_file(func,f'data remove storage {defualt_STORAGE} stack_frame[-1]\n',**kwargs)
         self.write_file(func,f'scoreboard players reset #{defualt_STORAGE}.stack.end {scoreboard_objective}\n',**kwargs)
 
     def mcf_stack_break(self,func:str,*args,**kwargs):
         '''栈 中 break'''
         self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
-        self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_break set value 1b\n',**kwargs)
-        # self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_end set value 1b\n',**kwargs)
+        self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_break set value 1b\n',**kwargs)
+        # self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_end set value 1b\n',**kwargs)
 
 
     def mcf_stack_continue(self,func:str,*args,**kwargs):
         '''栈 中 continue'''
         self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
-        self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_continue set value 1b\n',**kwargs)
-        # self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_end set value 1b\n',**kwargs)
+        self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_continue set value 1b\n',**kwargs)
+        # self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_end set value 1b\n',**kwargs)
 
     def mcf_stack_return(self,func:str,*args,**kwargs):
         '''栈 中 return'''
         self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
         self.write_file(func,f'\n    ##终止\n    return 1\n    ##\n',**kwargs)
-        # self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_return set value 1b\n',**kwargs)
-        # self.write_file(func,f'data modify storage {defualt_STORAGE} main_tree[-1].is_end set value 1b\n',**kwargs)
+        # self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_return set value 1b\n',**kwargs)
+        # self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_end set value 1b\n',**kwargs)
 
     def mcf_reset_score(self,value,func,*args,**kwargs):
         '''重置实体记分板值'''
@@ -297,7 +299,7 @@ execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} r
 
     def mcf_remove_Last_exp_operation(self,func,*args,**kwargs):
         '''移除 exp_operation[-1]'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} main_tree[-1].exp_operation[-1]\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1]\n',**kwargs)
 
     def mcf_call_function(self,func_name,func,isCustom=False,prefix="",matcher=None,*args,**kwargs):
         '''调用mcf函数
