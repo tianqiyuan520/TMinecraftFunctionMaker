@@ -58,12 +58,12 @@ class mcf_modifier(editor_file):
             self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
 
     def mcf_add_exp_operation(self,value,func,index:-1,*args,**kwargs):
-        '''mcf 表达式运算过程中添加值 变量添加'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].exp_operation append value {{"value":{value},"type":"num"}}\n',**kwargs)
+        '''mcf 表达式运算过程中添加值 变量添加\n或者是编译器能够自动算完所有运算时，存储最后一个'''
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} data.exp_operation append value {{"value":{value},"type":"num"}}\n',**kwargs)
 
     def mcf_add_exp_operation2(self,value,func,index:-1,index2:-1,*args,**kwargs):
         '''mcf 表达式运算过程中添加值 返回值添加'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].exp_operation append from storage {defualt_STORAGE} stack_frame[-1].return[{index2}]\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} data.exp_operation append from storage {defualt_STORAGE} stack_frame[-1].return[{index2}]\n',**kwargs)
     ## 运算处理
     def mcf_change_exp_operation(self,operation,func,index:-1,type1,type2,*args,**kwargs):
         '''mcf 表达式运算过程中修改值 数值运算'''
@@ -88,7 +88,7 @@ class mcf_modifier(editor_file):
             scale2 = 1000
             self.mcf_operation_num(operation,func,index,scale,scale2,*args,**kwargs)
         self.write_file(func,
-        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-2]
+        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} data.exp_operation[-2]
 ''',**kwargs)
 
 # 主要直接修改给定的storage
@@ -152,38 +152,38 @@ execute store result storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":
     # 字符串间运算
     def mcf_operation_str(self,operation,func,*args,**kwargs):
         self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].dync','set',{},func,**kwargs)
-        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg0','set',f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-2].value',func,**kwargs)
-        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg1','set',f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1].value',func,**kwargs)
+        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg0','set',f'storage {defualt_STORAGE} data.exp_operation[-2].value',func,**kwargs)
+        self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg1','set',f'storage {defualt_STORAGE} data.exp_operation[-1].value',func,**kwargs)
         self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
         self.write_file(func,f'##函数调用_end\n',**kwargs)
         # 内容
         kwargs['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
         kwargs['f2'] = f'_start'
-        self.write_file(func,f'##    动态命令\n$data modify storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1].value set value ',**kwargs)
+        self.write_file(func,f'##    动态命令\n$data modify storage {defualt_STORAGE} data.exp_operation[-1].value set value ',**kwargs)
         self.write_file(func,f'\'$(arg0)$(arg1)\'',**kwargs)
         self.stack_frame[0]["dync"] += 1
     # 数字间运算
     def mcf_operation_num(self,operation,func,index,scale,scale2,*args,**kwargs):
         from math import log
         self.write_file(func,
-        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-2].value {scale}
-execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value {scale2}
+        f'''execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} data.exp_operation[-2].value {scale}
+execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} run data get storage {defualt_STORAGE} data.exp_operation[-1].value {scale2}
 ''',**kwargs)
         if isinstance(operation,ast.Add):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} += #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} data.exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} += #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Sub):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} -= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} data.exp_operation[-1].value double {10**(-1*round(log(scale,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} -= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Mult):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale*scale2,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} *= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} data.exp_operation[-1].value double {10**(-1*round(log(scale*scale2,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} *= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Div):
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-2].value {scale*1000}\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} stack_frame[{index}].exp_operation[-1].value double {10**(-1*round(log(scale*1000,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} /= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result score #{defualt_NAME}.system.temp1 {scoreboard_objective} run data get storage {defualt_STORAGE} data.exp_operation[-2].value {scale*1000}\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute store result storage {defualt_STORAGE} data.exp_operation[-1].value double {10**(-1*round(log(scale*1000,10))):.12f} run scoreboard players operation #{defualt_NAME}.system.temp1 {scoreboard_objective} /= #{defualt_NAME}.system.temp2 {scoreboard_objective}\n',**kwargs)
         elif isinstance(operation,ast.Pow):
             self.write_file(func,f'次方运算\n')
     # 列表间运算
     def mcf_operation_list(self,operation,func,*args,**kwargs):
         if isinstance(operation,ast.Add):
-            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1].value','append',f'storage {defualt_STORAGE} stack_frame[-1].exp_operation[-2].value[]',func,**kwargs)
+            self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.exp_operation[-1].value','append',f'storage {defualt_STORAGE} data.exp_operation[-2].value[]',func,**kwargs)
 
     def mcf_change_value_by_storage(self,Storage,Storage2,func:str,*args,**kwargs):
         '''storage = storage'''
@@ -299,7 +299,7 @@ execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} r
 
     def mcf_remove_Last_exp_operation(self,func,*args,**kwargs):
         '''移除 exp_operation[-1]'''
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} stack_frame[-1].exp_operation[-1]\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data remove storage {defualt_STORAGE} data.exp_operation[-1]\n',**kwargs)
 
     def mcf_call_function(self,func_name,func,isCustom=False,prefix="",matcher=None,*args,**kwargs):
         '''调用mcf函数

@@ -42,27 +42,56 @@ class py_modifier(mcf_modifier):
             if i["id"] == key:
                 return i
         return None
-
+    def py_get_var_info2(self,key,key2,arr,index=-1,*args,**kwargs):
+        '''获取 变量详细信息'''
+        v = self.py_get_var_info(key,arr)
+        if v != None : return v.get(key2)
+        return None
     def py_get_value(self,key,func=None,index=-1,*args,**kwargs):
         '''获取py记录的堆栈值 变量值'''
-        for i in self.stack_frame[index]["data"]:
-            if i["id"] == key:
-                return i["value"]
-        #无
-        for i in self.stack_frame[0]["data"]:
-            if i["id"] == key:
-                return i["value"]
+        v = self.py_get_var_info2(key,"value",self.stack_frame[index]["data"])
+        if v != None : return v
+        v = self.py_get_var_info2(key,"value",self.stack_frame[0]["data"])
+        if v != None : return v
         return None
     def py_get_type(self,key,index=-1,*args,**kwargs):
         '''获取py记录的堆栈值 类型'''
-        for i in self.stack_frame[index]["data"]:
-            if i["id"] == key:
-                return i["type"]
-        #无
-        for i in self.stack_frame[0]["data"]:
-            if i["id"] == key:
-                return i["type"]
+        v = self.py_get_var_info2(key,"type",self.stack_frame[index]["data"])
+        if v != None : return v
+        v = self.py_get_var_info2(key,"type",self.stack_frame[0]["data"])
+        if v != None : return v
         return None
+    def get_listValue_by_index(self,arr,index:None,*args,**kwargs):
+        '''获取对应索引的数据'''
+        if isinstance(index,int):
+            try:
+                return arr[index]
+            except:
+                return None
+        elif isinstance(index,list):
+            try:
+                v = arr
+                for i in index:
+                    v = self.get_listValue_by_index(v,i)
+                return v
+            except:
+                return None
+        return None
+    def change_listVar_by_index(self,arr,index:list,Callfunc,*args,**kwargs):
+        '''修改对应索引的数据(list类型)\n修改数值函数'''
+        print(index,arr)
+        if len(index) == 1:
+            try:
+                arr[index[0]] = Callfunc(arr[index[0]])
+                # arr[index[0]] = value
+                return arr
+            except:
+                return arr
+        else:
+            try:
+                return self.change_listVar_by_index(arr[index[0]].get("value"),index[1::],Callfunc)
+            except:
+                return arr
     def py_check_type_is_mc(self,key,index=-1,*args,**kwargs):
         '''判断该值类型是否为 系统内置'''
         name = self.py_get_type(key,index,**kwargs)
@@ -251,6 +280,9 @@ class py_modifier(mcf_modifier):
             # 判断是否自定义类
             if self.py_check_class_exist(item):
                 return item
+            # 判断是否为基础类型的字符串形式
+            if self.check_basic_type(item):
+                return item
             return "str"
         elif isinstance(item,list):
             return "list"
@@ -263,5 +295,10 @@ class py_modifier(mcf_modifier):
             return None
     # 判断是否为基本类型
     def check_basic_type(self,item:str)->bool:
-        if item in ["int","float","str","list"]: return True
+        '''判断是否为基本类型'''
+        if item in ["int","float","str","list","dict","tuple","None",None]: return True
         return False
+
+    def valueChange(self,value,value2):
+        '''数据修改'''
+        value = value2

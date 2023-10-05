@@ -67,7 +67,6 @@ def reload():
 #         mc.run(['say ',str(i)])
 #         i += 1
 # test()
-
 # @mc.cache
 # def aa():
 #     return 3
@@ -96,15 +95,18 @@ def reload():
 # v1 = vector(2,10)
 # v2 = vector(4,5)
 # v3 = ((v2 - v1)+v1) * v2 *v2
-# print(v3)
+# print(v1)
 
 
-class aa:
-    def __init__(self) -> None:
-        self.x = 0
-    def b(self)->"aa":
-        self.x += 1
-        return self
+# class aa:
+#     def __init__(self) -> None:
+#         self.x = 0
+#     def b(self)->"aa":
+#         ...
 
-a = aa()
-bb = a.b().x
+# a = aa()
+
+# x = a.b().b()
+
+# b = [[1,2],3]
+# print(b[0][0],b[0][1],b[1])

@@ -1,15 +1,10 @@
-def test_print(func):
-    def tes(*args, **kwargs):
-        print("输入2",*args, **kwargs)
-        print(1)
-        return func(*args, **kwargs)
-    return tes
+import copy
 
 
-class aa:
-    @test_print
-    def test(self):
-        print(2)
+a = {"value": [1,2,3]}
+b = a.copy()
+c = copy.deepcopy(a)
+print(a,b,c)
+a["value"].append(4)
+print(a,b,c)
 
-a = aa()
-a.test()

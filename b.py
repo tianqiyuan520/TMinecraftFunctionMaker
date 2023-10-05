@@ -283,3 +283,5 @@ Expr(value=Attribute(
 
 Expr(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='a', ctx=Load()), attr='b', ctx=Load()), args=[], keywords=[]), attr='b', ctx=Load()), args=[], keywords=[]))
 Expr(value=Attribute(value=Call(func=Attribute(value=Name(id='a', ctx=Load()), attr='b', ctx=Load()), args=[], keywords=[]), attr='x', ctx=Load()))
+
+Expr(value=Subscript(value=Name(id='a', ctx=Load()), slice=Index(value=Constant(value=0, kind=None)), ctx=Load())), Expr(value=Subscript(value=Name(id='b', ctx=Load()), slice=Index(value=Constant(value='3', kind=None)), ctx=Load()))
