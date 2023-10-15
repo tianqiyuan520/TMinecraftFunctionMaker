@@ -79,7 +79,7 @@ class py_modifier(mcf_modifier):
         return None
     def change_listVar_by_index(self,arr,index:list,Callfunc,*args,**kwargs):
         '''修改对应索引的数据(list类型)\n修改数值函数'''
-        print(index,arr)
+        
         if len(index) == 1:
             try:
                 arr[index[0]] = Callfunc(arr[index[0]])
@@ -92,12 +92,26 @@ class py_modifier(mcf_modifier):
                 return self.change_listVar_by_index(arr[index[0]].get("value"),index[1::],Callfunc)
             except:
                 return arr
+    def get_listVar_by_index(self,arr,index:list,*args,**kwargs):
+        '''获取对应索引的数据(list类型)\n'''
+        if len(index) == 1:
+            try:
+                return arr[index[0]]
+                # arr[index[0]] = value
+            except:
+                return arr
+        else:
+            try:
+                return self.get_listVar_by_index(arr[index[0]].get("value"),index[1::])
+            except:
+                return arr
     def py_check_type_is_mc(self,key,index=-1,*args,**kwargs):
         '''判断该值类型是否为 系统内置'''
         name = self.py_get_type(key,index,**kwargs)
         if(name in ["MC.ENTITY"]):
             return True
         return False
+        
     def py_return_type_mc(self,key,index=-1,*args,**kwargs):
         '''返回该值类型 系统'''
         name = self.py_get_type(key,index,**kwargs)

@@ -50,12 +50,12 @@ class mcf_modifier(editor_file):
         - isfundef 是否 给函数的参数初始化默认值'''
         if not isfundef:
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
         else:
             if(is_global):
-                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
-            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}","type":"{newType}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+                self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{key}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
+            self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute unless data storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}] run data modify storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{key}"}}].value set from storage {defualt_STORAGE} stack_frame[{index2}].data[{{"id":{key2}}}].value\n',**kwargs)
 
     def mcf_add_exp_operation(self,value,func,index:-1,*args,**kwargs):
         '''mcf 表达式运算过程中添加值 变量添加\n或者是编译器能够自动算完所有运算时，存储最后一个'''
