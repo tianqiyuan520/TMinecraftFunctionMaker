@@ -224,9 +224,11 @@ class py_modifier(mcf_modifier):
         return False
     # 获取该函数的信息
     def get_function_info(self,key,*args,**kwargs):
+        arr = []
         for i in self.stack_frame[0]["functions"]:
             if i["id"] == key:
-                return i
+                arr.append(i)
+        if arr:return arr[-1]
         return None
 
     # 获取class记录的函数列表
@@ -262,11 +264,13 @@ class py_modifier(mcf_modifier):
     # 获取该类方法的信息
     def get_class_function_info(self,key,key2,*args,**kwargs):
         '''key类名，key2方法名\n获取类下的方法信息，若不存在则返回None'''
+        arr = []
         for i in range(len(self.stack_frame[0]["class_list"])):
             if self.stack_frame[0]["class_list"][i]["id"] == key:
                 for j in range(len(self.stack_frame[0]["class_list"][i]["functions"])):
                     if self.stack_frame[0]["class_list"][i]["functions"][j]["id"] == key2:
-                        return self.stack_frame[0]["class_list"][i]["functions"][j]
+                        arr.append(self.stack_frame[0]["class_list"][i]["functions"][j])
+        if arr:return arr[-1]
         return None
     # Class 定义函数是否返回
     def GetReturnType(self,tree:ast.FunctionDef,**kwargs) -> str:
@@ -316,3 +320,4 @@ class py_modifier(mcf_modifier):
     def valueChange(self,value,value2):
         '''数据修改'''
         value = value2
+

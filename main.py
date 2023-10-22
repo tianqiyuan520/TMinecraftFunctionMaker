@@ -10,7 +10,8 @@
 import ast
 from TMCFM import TMCFM
 from read_config import read_json
-
+import platform
+import time
 if __name__ == "__main__":
 
     try:
@@ -33,7 +34,8 @@ if __name__ == "__main__":
         # content = f.read().split('\n')
         content = f.read()
     # content = input('>>> ')
-
+    T1 = time.perf_counter()
+    
     #ast show
     code_ = ast.parse(content)
     print(ast.dump(code_))
@@ -41,6 +43,7 @@ if __name__ == "__main__":
     for i in range(len(cfg["path"])):
         comp = TMCFM(content,i)
         comp.main()
-    
-    print("success")
+
+    T2 =time.perf_counter()
+    print('success runTime:%sms' % ((T2 - T1)*1000))
     # input(">>> ")

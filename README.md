@@ -150,4 +150,30 @@ def test():
 test()
 ```
 
+#### 数组
+
+```python
+数组
+壹 = 1
+a = [2,"612",[壹,["❤"+"❤"]]]
+print(a[2][壹][0])
+```
+
+#### 闭包
+
+```python
+def inner():
+    print(6)
+inner()
+#闭包
+def func(x,b=4):
+    def wrapper(y):
+        def inner(z):
+            print(b,x,y,z)
+        return inner
+    return wrapper
+
+x = func(1,b="数据:")(2)("👌")
+```
+
 ---

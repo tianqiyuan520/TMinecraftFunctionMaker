@@ -1,15 +1,12 @@
-#数据包重新加载时触发
-#    
 ##函数参数初始化
 #函数传参赋值
 ##函数主体
-#表达式调用 (CALL: '数据包重新加载时触发\n    ')
-#表达式调用 (CALL: print('重载完成'))
+#表达式调用 (CALL: print(6))
 
 ##    调用函数
 #参数处理
 data modify storage test:system data.call_list append value []
-data modify storage test:system data.call_list[-1] append value {"value": "重载完成", "id": "None"}
+data modify storage test:system data.call_list[-1] append value {"value": 6, "id": "None"}
 data modify storage test:system stack_frame append from storage test:system stack_frame[-1]
 #内置函数/类实例化调用
 #函数传参赋值

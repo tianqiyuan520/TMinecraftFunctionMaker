@@ -31,7 +31,7 @@ class mcf_modifier(editor_file):
     def __init__(self) -> None:
         pass
     def mcf_change_value(self,key,value,is_global:False,func:str,isfundef:False,index:-1,newType="",*args,**kwargs):
-        '''修改mcf中的堆栈值 常量修改'''
+        '''修改mcf中的堆栈值 常量修改\nisfundef 函数参数定义，会添加判断数据'''
         if isinstance(value,str):
             value = "\""+str(value)+"\""
         if newType != "":
@@ -259,17 +259,26 @@ execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} r
     def mcf_new_stack(self,func,*args,**kwargs):
         '''新建栈'''
         self.write_file(func,f'#新建栈\n',**kwargs)
-        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame append value {{"data":[],"return":[],"exp_operation":[],"boolOPS":[],"for_list":[],"call_list":[],"call_list_":[],"list_handler":[],"dync":{{}}}}\n',**kwargs)
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame append value {{"data":[],"return":[],"boolOPS":[],"for_list":[],"dync":{{}}}}\n',**kwargs)
         
     def mcf_new_stack_inherit_data(self,func,*args,**kwargs):
         '''新建的栈 继承上一个栈值的data数据'''
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[-1].data set from storage {defualt_STORAGE} stack_frame[-2].data\n',**kwargs)
+
+    def mcf_new_stack_extend(self,func,*args,**kwargs):
+        '''新建的栈 继承上一个栈'''
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame append from storage {defualt_STORAGE} stack_frame[-1]\n',**kwargs)
+    def mcf_new_stack_extend_by_key(self,key,func,*args,**kwargs):
+        '''新建的栈 继承上一个栈的制定值'''
+        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[-1].{key} set from storage {defualt_STORAGE} stack_frame[-1].{key}\n',**kwargs)
 
     def mcf_old_stack_cover_data(self,func,*args,**kwargs):
         '''上一个栈 覆盖原先的data数据 ，新的data来自 新建的栈'''
         self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[-2].data set from storage {defualt_STORAGE} stack_frame[-1].data\n',**kwargs)
     def mcf_remove_stack_data(self,func:str,*args,**kwargs):
         '''出栈'''
+        if kwargs.get('IsStoreData'):
+            self.write_file(func,f'data modify storage {defualt_STORAGE} temp set from storage {defualt_STORAGE} stack_frame[-1]\n',**kwargs)
         self.write_file(func,f'data remove storage {defualt_STORAGE} stack_frame[-1]\n',**kwargs)
         self.write_file(func,f'scoreboard players reset #{defualt_STORAGE}.stack.end {scoreboard_objective}\n',**kwargs)
 

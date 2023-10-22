@@ -67,9 +67,16 @@ def reload():
 #         mc.run(['say ',str(i)])
 #         i += 1
 # test()
+
 # @mc.cache
-# def aa():
-#     return 3
+# def fib(n)->"int":
+#     if n <= 2:
+#         return 1
+#     else:
+#         return fib(n - 1) + fib(n - 2)
+
+# for i in range(1,14):
+#     print(fib(i))
 
 # class aa:
 #     def test(self) ->"bb":
@@ -80,7 +87,7 @@ def reload():
 
 
 # class vector:
-#     def __init__(self, a, b):
+#     def __init__(self,a,b):
 #         self.a = a
 #         self.b = b
 #     def __add__(self,other)->"vector":
@@ -95,7 +102,7 @@ def reload():
 # v1 = vector(2,10)
 # v2 = vector(4,5)
 # v3 = ((v2 - v1)+v1) * v2 *v2
-# print(v1)
+# print(v3)
 
 
 # class aa:
@@ -105,8 +112,27 @@ def reload():
 #         ...
 
 # a = aa()
-
 # x = a.b().b()
 
-b = [[1,2],3]
-c = b[0][0]
+##
+def inner():
+    print(6)
+inner()
+#闭包
+def func(x,b=4):
+    def wrapper(y):
+        def inner(z):
+            print(b,x,y,z)
+        return inner
+    return wrapper
+
+x = func(1,b="数据:")(2)("👌")
+
+
+# x = {a:3}
+# args=arguments(posonlyargs=[], args=[arg(arg='x'), arg(arg='b')], kwonlyargs=[], kw_defaults=[], defaults=[])
+
+# 数组
+# 壹 = 1
+# a = [2,"612",[壹,["❤"+"❤"]]]
+# print(a[2][壹][0])
