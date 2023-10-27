@@ -115,18 +115,18 @@ def reload():
 # x = a.b().b()
 
 ##
-def inner():
-    print(6)
-inner()
-#闭包
-def func(x,b=4):
-    def wrapper(y):
-        def inner(z):
-            print(b,x,y,z)
-        return inner
-    return wrapper
+# def inner():
+#     print(6)
+# inner()
+# #闭包
+# def func(x,b=4):
+#     def wrapper(y):
+#         def inner(z):
+#             print(b,x,y,z)
+#         return inner
+#     return wrapper
 
-x = func(1,b="数据:")(2)("👌")
+# x = func(1,b="数据:")(2)("👌")
 
 
 # x = {a:3}
@@ -136,3 +136,22 @@ x = func(1,b="数据:")(2)("👌")
 # 壹 = 1
 # a = [2,"612",[壹,["❤"+"❤"]]]
 # print(a[2][壹][0])
+
+# 类中的闭包函数
+# def inner():
+#     inner()
+
+# def wrapper():
+#     print(6)
+
+# class aa:
+#     def func(self):
+#         wrapper()
+#         def wrapper():
+#             def inner():
+#                 wrapper()
+#             inner()
+#         inner()
+#     def func2(self):
+#         ...
+

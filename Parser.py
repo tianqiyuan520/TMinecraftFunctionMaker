@@ -628,7 +628,6 @@ class Parser(py_modifier):
 # 函数定义
     def FunctionDef(self,tree:ast.FunctionDef,func:str,index:-1,func2:str,*args,**kwargs):
         '''函数定义'''
-        kwargs['Is_new_function'] = True
         Return_type = self.GetReturnType(tree,**kwargs)
         funcName = func
         funcPath = func
@@ -637,19 +636,21 @@ class Parser(py_modifier):
         if func2 != '__main__' and not self.py_check_class_exist(func2.replace('\\','/')):
             func = func2.replace('\\','/') + '/'  + funcName
             funcPath = func2.replace('\\','/') + '\\'  + funcName
-        if not kwargs.get("ClassName"):
+        if not kwargs.get("ClassName") or (kwargs.get("ClassName") and kwargs.get('Is_new_function') == True):
             callpath = defualt_NAME+":"+func+"/_start"
-            self.stack_frame[0]["functions"].append({"id":funcName,"args":[],"call":"_start","type":Return_type,"callPath":callpath})
+            if kwargs.get("ClassName"): callpath = defualt_NAME+":"+kwargs.get("ClassName")+"/"+func+"/_start"
+            self.stack_frame[-1]["functions"].append({"id":funcName,"args":[],"call":"_start","type":Return_type,"callPath":callpath})
         #读取函数参数
         args_list = []
         for item in tree.args.args:
             if isinstance(item,ast.arg):
                 if not kwargs.get("ClassName"):
-                    self.stack_frame[0]["functions"][-1]["args"].append(item.arg)
+                    self.stack_frame[-1]["functions"][-1]["args"].append(item.arg)
                 args_list.append(item.arg)
-        if kwargs.get("ClassName"):
+        if kwargs.get("ClassName") and kwargs.get('Is_new_function') != True:
             callpath = defualt_NAME+":"+kwargs.get("ClassName")+"/"+func+"/_start"
             self.py_get_class_add_function(kwargs.get("ClassName"),[funcName,Return_type,args_list,None,callpath])
+        kwargs['Is_new_function'] = True
         #将该函数存储到栈的变量中
         self.py_change_value(funcName,callpath,True,func2,False,index,**kwargs)
         self.py_append_tree()
@@ -662,6 +663,7 @@ class Parser(py_modifier):
         if kwargs.get("f2"):
             kwargs.pop("f2")
         f2 = "_start"
+        
         if self.get_func_info(kwargs.get("ClassName"),funcName,**kwargs).get("cached"):
             f2 = "_start2"
         

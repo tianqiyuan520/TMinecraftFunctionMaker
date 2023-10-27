@@ -1,14 +1,18 @@
 ##函数参数初始化
 #函数传参赋值
 ##函数主体
-#表达式调用 (CALL: inner())
+#表达式调用 (CALL: print(6))
 
 ##    调用函数
 #参数处理
 data modify storage test:system data.call_list append value []
+data modify storage test:system data.call_list[-1] append value {"value": 6, "id": "None"}
 data modify storage test:system stack_frame append from storage test:system stack_frame[-1]
-#函数调用
-function test:inner/_start
+#内置函数/类实例化调用
+#函数传参赋值
+#自定义函数调用
+tellraw @a [{"nbt":"data.call_list[-1][0].value","storage":"test:system"}]
+##函数调用_end
 data remove storage test:system stack_frame[-1]
 scoreboard players reset #test:system.stack.end input
 ##  调用结束

@@ -225,25 +225,30 @@ class py_modifier(mcf_modifier):
     # 获取该函数的信息
     def get_function_info(self,key,*args,**kwargs):
         arr = []
-        for i in self.stack_frame[0]["functions"]:
-            if i["id"] == key:
-                arr.append(i)
+        for j in range(len(self.stack_frame)):
+            for i in self.stack_frame[j]["functions"]:
+                if i["id"] == key:
+                    arr.append(i)
         if arr:return arr[-1]
         return None
 
     # 获取class记录的函数列表
     def py_get_class_functions(self,key)->list:
-        '''获取py记录的堆栈中 class定义'''
-        for i in self.stack_frame[0]["class_list"]:
-            if i["id"] == key:
-                return i["functions"]
+        '''获取py记录的堆栈中 function列表'''
+        arr = []
+        for j in range(len(self.stack_frame)):
+            for i in self.stack_frame[j]["class_list"]:
+                if i["id"] == key:
+                    arr.append(i["functions"])
+        if arr: return arr[-1]
         return None
     # 判断是否定义过该class
     def py_check_class_exist(self,key)->bool:
         '''获取py记录的堆栈中 class是否定义过'''
-        for i in self.stack_frame[0]["class_list"]:
-            if i["id"] == key:
-                return True
+        for j in range(len(self.stack_frame)):
+            for i in self.stack_frame[j]["class_list"]:
+                if i["id"] == key:
+                    return True
         return False
     # Class 函数添加
     def py_get_class_add_function(self,key,value):
@@ -252,26 +257,32 @@ class py_modifier(mcf_modifier):
         - value 为 [函数名称,返回值类型,参数列表]
         '''
         if not self.py_check_class_exist(key):
-            self.stack_frame[0]["class_list"].append({"id":key,"functions":[]})
-        for i in range(len(self.stack_frame[0]["class_list"])):
-            if self.stack_frame[0]["class_list"][i]["id"] == key:
-                for j in range(len(self.stack_frame[0]["class_list"][i]["functions"])):
-                    if self.stack_frame[0]["class_list"][i]["functions"][j]["id"] == value[0]:
-                        self.stack_frame[0]["class_list"][i]["functions"][j] = {"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""}
+            self.stack_frame[-1]["class_list"].append({"id":key,"functions":[]})
+        arr = []
+        for j in range(len(self.stack_frame)):
+            for i in range(len(self.stack_frame[j]["class_list"])):
+                if self.stack_frame[j]["class_list"][i]["id"] == key:
+                    arr = self.stack_frame[j]
+        for i in range(len(arr["class_list"])):
+            if arr["class_list"][i]["id"] == key:
+                for j in range(len(arr["class_list"][i]["functions"])):
+                    if arr["class_list"][i]["functions"][j]["id"] == value[0]:
+                        arr["class_list"][i]["functions"][j] = {"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""}
                         return None
-                self.stack_frame[0]["class_list"][i]["functions"].append({"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""})
+                arr["class_list"][i]["functions"].append({"id":value[0],"type":value[1],"args":value[2],"from":value[3] if len(value) >=4 else None,"callPath":value[4] if len(value) >=5 else ""})
                 return None
     # 获取该类方法的信息
     def get_class_function_info(self,key,key2,*args,**kwargs):
         '''key类名，key2方法名\n获取类下的方法信息，若不存在则返回None'''
         arr = []
-        for i in range(len(self.stack_frame[0]["class_list"])):
-            if self.stack_frame[0]["class_list"][i]["id"] == key:
-                for j in range(len(self.stack_frame[0]["class_list"][i]["functions"])):
-                    if self.stack_frame[0]["class_list"][i]["functions"][j]["id"] == key2:
-                        arr.append(self.stack_frame[0]["class_list"][i]["functions"][j])
+        for z in range(len(self.stack_frame)):
+            for i in range(len(self.stack_frame[z]["class_list"])):
+                if self.stack_frame[z]["class_list"][i]["id"] == key:
+                    for j in range(len(self.stack_frame[z]["class_list"][i]["functions"])):
+                        if self.stack_frame[z]["class_list"][i]["functions"][j]["id"] == key2:
+                            arr.append(self.stack_frame[z]["class_list"][i]["functions"][j])
         if arr:return arr[-1]
-        return None
+        return {}
     # Class 定义函数是否返回
     def GetReturnType(self,tree:ast.FunctionDef,**kwargs) -> str:
         '''判断该函数返回值类型'''
