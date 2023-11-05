@@ -3,7 +3,7 @@
 # -*- encoding: utf-8 -*-
 '''
 @File    :   main.py
-@Time    :   2023/5/17
+@Time    :   2023/5/13
 @Author  :   tianqiyuan520
 '''
 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         # from pydub.playback import play
         # import random
         # rand = random.choice([1,2])
-        # song = AudioSegment.from_file(f"sounds//smithing_table{rand}.mp3", format="mp3")
+        # song = AudioSegment.from_file(f"sounds/smithing_table{rand}.mp3", format="mp3")
         # play(song)
         ...
     except:
@@ -30,6 +30,7 @@ if __name__ == "__main__":
     #open file
     content = ""
     cfg = read_json.read('config.json')['config']
+    #
     with open(cfg["InputFile"],'r',encoding='utf-8') as f:
         # content = f.read().split('\n')
         content = f.read()

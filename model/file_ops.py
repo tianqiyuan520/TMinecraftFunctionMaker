@@ -21,8 +21,8 @@ def update_config():
     cfg = read_json.read('config.json')['config']
     global defualt_DataPath
     global defualt_PATH
-    defualt_DataPath = cfg['path'][Pathtime]+"data\\"
-    defualt_PATH = cfg['path'][Pathtime]+"data\\"+cfg['name'] + '\\'
+    defualt_DataPath = cfg['path'][Pathtime]+"data/"
+    defualt_PATH = cfg['path'][Pathtime]+"data/"+cfg['name'] + '/'
 
 class file_ops:
     def __init__(self) -> None:
@@ -82,10 +82,10 @@ class editor_file:
         if(Is_def_func) and not inNewFile:
             PATH_ = None
         if ClassName != "":
-            ClassName = ClassName+'\\'
+            ClassName = ClassName+'/'
         if(PATH_==None):
-            path = defualt_PATH+'functions\\'+ClassName+func+'\\'
-            func_path = defualt_PATH+'functions\\'+ClassName+func+'\\'+func2+'.mcfunction'
+            path = defualt_PATH+'functions/'+ClassName+func+'/'
+            func_path = defualt_PATH+'functions/'+ClassName+func+'/'+func2+'.mcfunction'
             folder = os.path.exists(path)
             if not folder:
                 os.makedirs(path)
@@ -97,9 +97,9 @@ class editor_file:
                 with open(func_path,"w",encoding='utf-8') as f:
                     f.write(text)
         else:
-            PATH_ = defualt_PATH+'functions\\'+ClassName+PATH_
-            if(PATH_[-1]!="\\"):
-                PATH_ += "\\"
+            PATH_ = defualt_PATH+'functions/'+ClassName+PATH_
+            if(PATH_[-1]!="/"):
+                PATH_ += "/"
             func_path = PATH_+func2+'.mcfunction'
             folder = os.path.exists(PATH_)
             if not folder:
@@ -124,7 +124,7 @@ class editor_file:
         folder = os.path.exists(path)
         if not folder:
             os.makedirs(path)
-        file_path = path if path[-1] == '\\' else path + '\\'
+        file_path = path if path[-1] == '/' else path + '/'
         folder = os.path.exists(file_path)
         if folder:
             with open(file_path+name,mode,encoding='utf-8') as f:
@@ -159,10 +159,10 @@ class editor_file:
         if(Is_def_func):
             PATH_ = None
         if ClassName != "":
-            ClassName = ClassName+'\\'
+            ClassName = ClassName+'/'
         if(PATH_==None):
-            path = defualt_PATH+'functions\\'+ClassName+func+'\\'
-            func_path = defualt_PATH+'functions\\'+ClassName+func+'\\'+func2+'.mcfunction'
+            path = defualt_PATH+'functions/'+ClassName+func+'/'
+            func_path = defualt_PATH+'functions/'+ClassName+func+'/'+func2+'.mcfunction'
             folder = os.path.exists(path)
             if not folder:
                 os.makedirs(path)
@@ -178,9 +178,9 @@ class editor_file:
                             time -= 1
                         f.write(i)
         else:
-            PATH_ = defualt_PATH+'functions\\'+ClassName+PATH_
-            if(PATH_[-1]!="\\"):
-                PATH_ += "\\"
+            PATH_ = defualt_PATH+'functions/'+ClassName+PATH_
+            if(PATH_[-1]!="/"):
+                PATH_ += "/"
             func_path = PATH_+func2+'.mcfunction'
             folder = os.path.exists(PATH_)
             if not folder:

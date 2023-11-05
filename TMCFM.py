@@ -56,14 +56,14 @@ class TMCFM:
     }}
 }}''')
             f.close()
-            PATH = cfg['path'][Pathtime]+'data\\' # 项目地址
+            PATH = cfg['path'][Pathtime]+'data/' # 项目地址
             folder = os.path.exists(PATH+cfg['name'])
             if not folder:
                 os.makedirs(PATH+cfg['name'])
             folder = os.path.exists(PATH+'minecraft')
             if not folder:
                 os.makedirs(PATH+'minecraft')
-            PATH = PATH+cfg['name'] + '\\'
+            PATH = PATH+cfg['name'] + '/'
             for i in ['advancements','functions','predicates','tags']:
                 folder = os.path.exists(PATH+i)
                 if not folder:

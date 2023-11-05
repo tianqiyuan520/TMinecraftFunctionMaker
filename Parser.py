@@ -36,8 +36,8 @@ def update_config():
     cfg = read_json.read('config.json')['config']
     global defualt_DataPath
     global defualt_PATH
-    defualt_DataPath = cfg['path'][Pathtime]+"data\\"
-    defualt_PATH = cfg['path'][Pathtime]+"data\\"+cfg['name'] + '\\'
+    defualt_DataPath = cfg['path'][Pathtime]+"data/"
+    defualt_PATH = cfg['path'][Pathtime]+"data/"+cfg['name'] + '/'
 
 
 class Parser(py_modifier):
@@ -57,7 +57,7 @@ class Parser(py_modifier):
         self.write_file('',f'scoreboard players reset * {scoreboard_objective2}\n',f2="_init",**kwargs)
         self.write_file('',f'#初始化栈\n',f2="_init",**kwargs)
         self.write_file('',f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame set value [{{"data":[],"return":[],"boolOPS":[],"boolResult":[],"for_list":[],"dync":{{}}}}]\n',f2="_init",**kwargs)
-        self.write_file('',f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} data set value {{"exp_operation":[],"list_handler":[],"call_list":[],"Subscript":""}}\n',f2="_init",**kwargs)
+        self.write_file('',f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} data set value {{"exp_operation":[],"list_handler":[],"dict_handler":[],"call_list":[],"Subscript":""}}\n',f2="_init",**kwargs)
         self.write_file('',f'#初始化堆\n',f2="_init",**kwargs)
         self.write_file('',f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} heap set value []\n',f2="_init",**kwargs)
         self.mcf_call_function(f'_init','__main__',False,f'',**kwargs)
@@ -157,7 +157,7 @@ class Parser(py_modifier):
         # self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].dync','set',{},func,**kwargs)
         self.write_file(func,f'data remove storage {defualt_STORAGE} data.call_list[-1]\n',**kwargs)
         # 内容
-        kwargs['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
+        kwargs['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
         kwargs['f2'] = f'_start'
         self.write_file(func,f'##    动态命令\n$',inNewFile=True,**kwargs)
         for i in range(len(commands)):
@@ -182,7 +182,7 @@ class Parser(py_modifier):
         self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
         self.write_file(func,f'    ##动态命令调用end\n',**kwargs)
         # 内容
-        kwargs['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
+        kwargs['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
         kwargs['f2'] = f'_start'
 
         self.write_file(func,f'##    动态命令\n',inNewFile=True,**kwargs)
@@ -190,6 +190,8 @@ class Parser(py_modifier):
         for i in runFunction:
             self.write_file(func,i+'\n',inNewFile=True,**kwargs)
         self.stack_frame[0]["dync"] += 1
+
+
 ##
 
 ## 赋值
@@ -482,6 +484,33 @@ class Parser(py_modifier):
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
+        elif isinstance(tree.value,ast.Dict):
+            value = self.Dict(tree.value,func,**kwargs)
+            for i in tree.targets:
+                if isinstance(i,ast.Name):
+                    self.py_change_value(i.id,value["value"],False,func,False,index,**kwargs)
+                    self.py_change_value_type(i.id,value["type"],index,True,True,func,**kwargs)
+                    is_global = self.py_get_value_global(i.id,func,index,**kwargs)
+                    if(is_global):
+                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[0].data[{{"id":"{i.id}"}}].value set from storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
+                    self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{i.id}"}}].value set from storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
+                elif isinstance(i,ast.Attribute):
+                    ClassC = ClassCall(self.stack_frame,**kwargs)
+                    StoragePath = ClassC.class_var_to_str(i,func,**kwargs)
+                    self.mcf_modify_value_by_from(f'{StoragePath}','set',f'storage {defualt_STORAGE} data.dict_handlerK[-1]',func,**kwargs)
+                    ClassC.modify_class_var(i,func,value["value"],**kwargs)
+                elif isinstance(i,ast.Subscript):
+                    x = []
+                    def change(storage):
+                        storage["value"] = value["value"]
+                        storage["type"] = value["type"]
+                        return storage
+                    def change2(storage,func,kwargs):
+                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.value set from storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
+                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.type set from value "list"\n',**kwargs)
+                    x.append(change2)
+                    x.append(change)
+                    returnValue = self.preSubscript(i,func,True,x,**kwargs)
 # 类型注解赋值
     def AnnAssign(self,tree:ast.AnnAssign,func:str,index:-1,*args,**kwargs):
         '''带有类型注释的赋值'''
@@ -507,6 +536,7 @@ class Parser(py_modifier):
 ## 运算调用前置
     def preBinOp(self,tree:ast.BinOp,op:ast.operator,func:str,index:-1,index2:-1,time=0,*args,**kwargs) -> dict:
         value = self.BinOp(tree,op,func,index,index2,time,**kwargs)
+        
         returnValue = value.value
         data = f'from storage {defualt_STORAGE} data.exp_operation[-1].value'
         isConstant = False
@@ -569,6 +599,9 @@ class Parser(py_modifier):
                 tree_list[item] = ast.Constant(value=value.get('value'), kind=["is_v",value.get('type')])
         tree.left,tree.right = (tree_list[0],tree_list[1])
         # 常量处理
+        if isinstance(tree.left,ast.List) and isinstance(tree.right,ast.List):
+            value = None
+            return ast.Constant(value=value, kind=["have_operation",self.check_type(value)])
         if isinstance(tree.left,ast.Constant) and isinstance(tree.right,ast.Constant):
             ## mcf 处理
             if (tree.left.kind == None) and (tree.right.kind == None ):
@@ -625,6 +658,7 @@ class Parser(py_modifier):
                     if sign != None: return call()
                 self.mcf_change_exp_operation(op,func,index,type1,type2,**kwargs)
                 return ast.Constant(value=value, kind=['is_v',self.check_type(value)])
+        return ast.Constant(value=None, kind=[None,None])
 # 函数定义
     def FunctionDef(self,tree:ast.FunctionDef,func:str,index:-1,func2:str,*args,**kwargs):
         '''函数定义'''
@@ -633,9 +667,9 @@ class Parser(py_modifier):
         funcPath = func
         #如果是类函数则添加进类数据中
         callpath = ''
-        if func2 != '__main__' and not self.py_check_class_exist(func2.replace('\\','/')):
-            func = func2.replace('\\','/') + '/'  + funcName
-            funcPath = func2.replace('\\','/') + '\\'  + funcName
+        if func2 != '__main__' and not self.py_check_class_exist(func2.replace('/','/')):
+            func = func2.replace('/','/') + '/'  + funcName
+            funcPath = func2.replace('/','/') + '/'  + funcName
         if not kwargs.get("ClassName") or (kwargs.get("ClassName") and kwargs.get('Is_new_function') == True):
             callpath = defualt_NAME+":"+func+"/_start"
             if kwargs.get("ClassName"): callpath = defualt_NAME+":"+kwargs.get("ClassName")+"/"+func+"/_start"
@@ -706,7 +740,7 @@ class Parser(py_modifier):
             # 内容
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg0','set',f'storage {defualt_STORAGE} stack_frame[-1].key',funcPath,**kwargs)
             self.mcf_call_function(f'{funcName2}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',funcPath,False,f'',**kwargs)
-            kwargs['p'] = f'{funcName2}//dync_{self.stack_frame[0]["dync"]}//'
+            kwargs['p'] = f'{funcName2}/dync_{self.stack_frame[0]["dync"]}/'
             CachedData = f'storage {defualt_STORAGE} stack_frame[0].CachedFunctions[{{"id":"{funcName2}"}}].value.\'$(arg0)\''
 
             if kwargs.get("ClassName"):
@@ -870,7 +904,7 @@ class Parser(py_modifier):
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg0','set',f'storage {defualt_STORAGE} stack_frame[-2].return[-1].value',func,**kwargs)
                 self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'',**kwargs)
                 kwargs2 = copy.deepcopy(kwargs)
-                kwargs2['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
+                kwargs2['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
                 self.write_file(func,f'##    动态命令\n$function $(arg0)\n',inNewFile=True,**kwargs2)
 
                 self.stack_frame[0]["dync"] +=1
@@ -958,9 +992,9 @@ class Parser(py_modifier):
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
                     kwargs_ = copy.deepcopy(kwargs)
                     kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                    kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                    kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                     kwargs['Is_new_function'] = False
-                    self.BoolOp(tree.value,0,func,True,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.BoolOp(tree.value,0,func,True,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                     self.BoolOp_operation(tree.value,0,0,func,**kwargs)
                     kwargs = kwargs_
                     #
@@ -984,7 +1018,7 @@ class Parser(py_modifier):
                     self.mcf_new_stack_inherit_data(func,**kwargs)
                     self.stack_frame[-1]['condition_time'] += 1
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-                    self.UnaryOp(tree.value,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.UnaryOp(tree.value,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                     self.write_file(func,f'scoreboard players operation #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} = #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective}\n',**kwargs)
                     #
                     self.py_call_list_append(-1,{"value":0,"id":i.id,"is_constant":False})
@@ -1072,7 +1106,7 @@ class Parser(py_modifier):
             self.mcf_new_stack_inherit_data(func,**kwargs)
             self.stack_frame[-1]['condition_time'] += 1
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-            self.UnaryOp(tree.value,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+            self.UnaryOp(tree.value,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
             self.write_file(func,f'scoreboard players operation #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} = #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective}\n',**kwargs)
             #
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-3].return','append',{"value":0},func,**kwargs)
@@ -1089,16 +1123,16 @@ class Parser(py_modifier):
         self.mcf_stack_return(func,**kwargs)
         self.write_file(func,f'##函数返回值处理_end\n',**kwargs)
 # 切片处理前置
-    def preSubscript(self,tree:ast.Subscript,func,isAssign=False,Assignfunc=None,*args,**kwargs):
-        '''isAssign:是否为赋值,\n若为赋值则传入赋值函数\nAssignfunc赋值函数修改strage数值,类型;py数值,类型'''
+    def preSubscript(self,tree:ast.Subscript,func,isAssign=False,Assignfunc=None,Dict=False,*args,**kwargs):
+        '''isAssign:是否为赋值,\n若为赋值则传入赋值函数\nAssignfunc赋值函数修改strage数值,类型;py数值,类型\n\nDict是否为字典类型'''
         if not isAssign:
             pretext = f'$data modify storage {defualt_STORAGE} data.Subscript set from'
-            returnValue =  self.Subscript(tree,func,0,**kwargs)
+            returnValue =  self.Subscript(tree,func,0,Dict,**kwargs)
             self.write_file(func,f'    ##动态命令调用\n',**kwargs)
             self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
             self.write_file(func,f'    ##动态命令调用end\n',**kwargs)
             # 内容
-            kwargs['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
+            kwargs['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
             kwargs['f2'] = f'_start'
             self.write_file(func,f'##    动态命令\n',inNewFile=True,**kwargs)
             #
@@ -1106,75 +1140,83 @@ class Parser(py_modifier):
             #
             self.stack_frame[0]["dync"] += 1
             #
-            x = self.get_listVar_by_index(returnValue[3],returnValue[2])
-            return {"storage":f'storage {defualt_STORAGE} data.Subscript',"value":x["value"],"type":x["type"]}
+            x = self.get_listVar_by_index(returnValue[3],returnValue[2],Dict)
+            return {"storage":f'storage {defualt_STORAGE} data.Subscript',"value":x.get("value"),"type":x.get("type")}
         else:
-            returnValue =  self.Subscript(tree,func,0,**kwargs)
+            returnValue =  self.Subscript(tree,func,0,Dict,**kwargs)
             self.write_file(func,f'    ##动态命令调用\n',**kwargs)
             self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
             self.write_file(func,f'    ##动态命令调用end\n',**kwargs)
             # 内容
-            kwargs['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
+            kwargs['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
             kwargs['f2'] = f'_start'
             self.write_file(func,f'##    动态命令\n',inNewFile=True,**kwargs)
             #
             self.write_file(func,f'$',inNewFile=True,**kwargs)
 
             Assignfunc[0](returnValue[0][0:-6],func,kwargs)
-            returnValue[3] = self.change_listVar_by_index(returnValue[3],returnValue[2],Assignfunc[1])
+            returnValue[3] = self.change_listVar_by_index(returnValue[3],returnValue[2],Assignfunc[1],Dict)
             self.stack_frame[0]["dync"] += 1
             #
             return {"storage":returnValue[0],"value":returnValue[1]["value"],"type":returnValue[1]["type"]}
 # 切片 (列表或字典)
-    def Subscript(self,tree:ast.Subscript,func,loop_time=0,*args,**kwargs):
+    def Subscript(self,tree:ast.Subscript,func,loop_time=0,Dict=False,*args,**kwargs):
         '''切片处理\n返回 (storage,value)'''
         # 类型扩建TODO
         if isinstance(tree.value,ast.Subscript):
-            returnValue =  self.Subscript(tree.value,func,loop_time+1,**kwargs)
+            returnValue =  self.Subscript(tree.value,func,loop_time+1,Dict,**kwargs)
             indexs = returnValue[2]
-            indexs.append(
-                self.Subscript_index(tree.slice,func,loop_time,**kwargs)
-            )
+            index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
+            indexs.append(index)
+            if isinstance(index,str):
+                return [returnValue[0]+f'.\'$(arg{loop_time})\'',returnValue[1],indexs,returnValue[3]]
             return [returnValue[0]+f'[$(arg{loop_time})].value',returnValue[1],indexs,returnValue[3]]
         else:
             if isinstance(tree.value,ast.Call):
                 # 函数返回值
                 returnValue = self.Expr(ast.Expr(value=tree.value),func,-1,**kwargs)
-                self.Subscript_index(tree.slice,func,loop_time,**kwargs)
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
+                if isinstance(index,str):
+                    return [f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value.\'$(arg{loop_time})\'',returnValue,[index],returnValue["value"]]
                 return [f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value[$(arg{loop_time})].value',returnValue,[index],returnValue["value"]]
             elif isinstance(tree.value,ast.Name):
                 # 变量
                 index = 0
                 
-                index = self.Subscript_index(tree.slice,func,loop_time,**kwargs)
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
                 value = None
                 # value = self.py_get_value(tree.value.id,func)
                 valueType = None
+                if isinstance(index,str):
+                    return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.id}"}}].value.\'$(arg{loop_time})\'',{"value":value,"type":valueType},[index],self.py_get_value(tree.value.id,func)]
                 return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.id}"}}].value[$(arg{loop_time})].value',{"value":value,"type":valueType},[index],self.py_get_value(tree.value.id,func)]
             elif isinstance(tree.value,ast.BinOp):
                 # 运算
-                index = self.Subscript_index(tree.slice,func,loop_time,**kwargs)
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
                 value = self.preBinOp(tree.value,tree.value.op,func,-1,-1,**kwargs)
                 self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].Subscript2 set value {value["data"]}\n',**kwargs)
                 if not value["isConstant"]: self.mcf_remove_Last_exp_operation(func,**kwargs)
                 return [f'storage {defualt_STORAGE} stack_frame[-1].Subscript2[$(arg{loop_time})].value',{"value":0,"type":None},[index],value["value"]]
             elif isinstance(tree.value,ast.Constant):
-                index = self.Subscript_index(tree.slice,func,loop_time,**kwargs)
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
+                if isinstance(index,str):
+                    return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.value}"}}].value.\'$(arg{loop_time})]\'',{"value":0,"type":None},[index],self.py_get_value(tree.value.value,func)]
                 return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.value}"}}].value[$(arg{loop_time})].value',{"value":0,"type":None},[index],self.py_get_value(tree.value.value,func)]
             elif isinstance(tree.value,ast.List):
                 returnValue = self.List(tree.value,func,**kwargs)
-                index = self.Subscript_index(tree.slice,func,loop_time,**kwargs)
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
+                if isinstance(index,str):
+                    return [f'storage {defualt_STORAGE} data.list_handler.\'$(arg{loop_time}).\'',returnValue,[index],returnValue["value"]]
                 return [f'storage {defualt_STORAGE} data.list_handler[$(arg{loop_time})].value',returnValue,[index],returnValue["value"]]
 
 # 切片指针处理器 (列表或字典)
-    def Subscript_index(self,tree,func,loop_time=0,*args,**kwargs):
+    def Subscript_index(self,tree,func,loop_time=0,Dict=False,*args,**kwargs):
 
         # 类型扩建TODO
         # 直接构建动态命令参数
         if isinstance(tree,ast.Subscript):
             returnValue =  self.preSubscript(tree,func,**kwargs)
             storage = returnValue["storage"]
-            
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',storage,func,**kwargs)
             return returnValue["value"]
         elif isinstance(tree,ast.Name):
@@ -1197,7 +1239,6 @@ class Parser(py_modifier):
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',f'storage {defualt_STORAGE} data.list_handler',func,**kwargs)
             return returnValue["value"]
 
-
 ## 逻辑模块
 # if
     def If(self,tree:ast.If,condition_time:0,func:str,mode:True,*args,**kwargs):
@@ -1215,10 +1256,10 @@ class Parser(py_modifier):
         self.stack_frame[-1]["record_condition"] = []
         if mode:
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/call',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} matches 0 if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} matches 0 run ',**kwargs)
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
         else:
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/call',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} matches 0 if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} matches 0 run ',**kwargs)
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
         kwargs['f2'] = f'call'
         kwargs['Is_new_function'] = False
         self.write_file(func,f'#\n',**kwargs)
@@ -1228,26 +1269,26 @@ class Parser(py_modifier):
             if mode:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                 kwargs['Is_new_function'] = False
-                self.BoolOp(tree.test,condition_time+1,func,mode,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.BoolOp(tree.test,condition_time+1,func,mode,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.BoolOp_operation(tree.test,1,0,func,**kwargs)
                 
             else:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
 
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                 kwargs['Is_new_function'] = False
                 
-                self.BoolOp(tree.test,condition_time+1,func,False,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.BoolOp(tree.test,condition_time+1,func,False,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.BoolOp_operation(tree.test,1,0,func,**kwargs)
         if isinstance(tree.test,ast.BinOp):
             self.stack_frame[-1]['condition_time'] += 1
             if mode:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                 kwargs['Is_new_function'] = False
                 value = self.preBinOp(tree.test,tree.test.op,func,-1,-1,**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].boolOPS','append',{"value":0},func,**kwargs)
@@ -1260,7 +1301,7 @@ class Parser(py_modifier):
             else:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                 kwargs['Is_new_function'] = False
                 value = self.preBinOp(tree.test,tree.test.op,func,-1,-1,**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].boolOPS','append',{"value":0},func,**kwargs)
@@ -1274,21 +1315,21 @@ class Parser(py_modifier):
             self.stack_frame[-1]['condition_time'] += 1
             if mode:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-                self.Compare(tree.test,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.Compare(tree.test,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.write_file(func,f'execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective} matches 1 run scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
             else:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-                self.Compare(tree.test,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.Compare(tree.test,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.write_file(func,f'execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective} matches 1 run scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
         elif isinstance(tree.test,ast.UnaryOp):
             self.stack_frame[-1]['condition_time'] += 1
             if mode:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-                self.UnaryOp(tree.test,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}')
+                self.UnaryOp(tree.test,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}')
                 self.write_file(func,f'scoreboard players operation #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} = #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective}\n',**kwargs)
             else:
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-                self.UnaryOp(tree.test,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.UnaryOp(tree.test,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.write_file(func,f'scoreboard players operation #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} = #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective}\n',**kwargs)
         elif isinstance(tree.test,ast.Name):
             self.stack_frame[-1]['condition_time'] += 1
@@ -1330,17 +1371,17 @@ class Parser(py_modifier):
                 kwargs['ClassName'] = kwargs.get("ClassName")
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/main',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} matches 1 if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} matches 0 run ',**kwargs)
                 # end if
-                self.write_file(func,f'scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} 1\n',p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'main',ClassName=kwargs.get("ClassName"))
+                self.write_file(func,f'scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} 1\n',p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'main',ClassName=kwargs.get("ClassName"))
                 kwargs['Is_new_function'] = False
-                self.walk(tree.body,func,-1,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'main',ClassName=kwargs.get("ClassName"))
+                self.walk(tree.body,func,-1,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'main',ClassName=kwargs.get("ClassName"))
             else:
                 #调用
                 kwargs['ClassName'] = kwargs.get("ClassName")
                 self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/main',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} matches 1 if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} matches 0 run ',**kwargs)
                 # end if
-                self.write_file(func,f'scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} 1\n',p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'main',ClassName=kwargs.get("ClassName"))
+                self.write_file(func,f'scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} 1\n',p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'main',ClassName=kwargs.get("ClassName"))
                 kwargs['Is_new_function'] = False
-                self.walk(tree.body,func,-1,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'main',ClassName=kwargs.get("ClassName"))
+                self.walk(tree.body,func,-1,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'main',ClassName=kwargs.get("ClassName"))
             if len(tree.orelse) >0:
                 kwargs = kwargs_
                 if isinstance(tree.orelse[0],ast.If) and len(tree.orelse) ==1:
@@ -1355,7 +1396,7 @@ class Parser(py_modifier):
                         #调用 else
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/else/main',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.end {scoreboard_objective} matches 0 run ',**kwargs)
                     # kwargs['Is_new_function'] = False
-                    self.walk(tree.orelse,func,-1,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//else//',f2=f'main',ClassName=kwargs.get("ClassName"))
+                    self.walk(tree.orelse,func,-1,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/else/',f2=f'main',ClassName=kwargs.get("ClassName"))
 
 # 布尔运算
     def BoolOp(self,tree:ast.BoolOp,condition_time:0,func:str,mode:bool = True,*args,**kwargs):
@@ -1369,43 +1410,43 @@ class Parser(py_modifier):
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
                     self.BoolOp_operation(item,condition_time+1,condition_time,func,**kwargs)
                     
-                    self.BoolOp(item,condition_time+1,func,mode,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.BoolOp(item,condition_time+1,func,mode,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 else:
                     
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
                     self.BoolOp_operation(item,condition_time+1,condition_time,func,**kwargs)
-                    self.BoolOp(item,condition_time+1,func,mode,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.BoolOp(item,condition_time+1,func,mode,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
             elif isinstance(item,ast.Compare):
                 self.stack_frame[-1]['condition_time'] += 1
                 if mode:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
                     self.BoolOp_record(tree,condition_time,self.stack_frame[-1]["condition_time"],func,**kwargs)
-                    self.Compare(item,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.Compare(item,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                     
                 else:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
                     self.BoolOp_record(tree,condition_time,self.stack_frame[-1]["condition_time"],func,**kwargs)
-                    self.Compare(item,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.Compare(item,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
             elif isinstance(item,ast.UnaryOp):
                 self.stack_frame[-1]['condition_time'] += 1
                 if mode:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
                     self.BoolOp_record(tree,condition_time,self.stack_frame[-1]["condition_time"],func,**kwargs)
-                    self.UnaryOp(item,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.UnaryOp(item,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 else:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
                     self.BoolOp_record(tree,condition_time,self.stack_frame[-1]["condition_time"],func,**kwargs)
-                    self.UnaryOp(item,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                    self.UnaryOp(item,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
             elif isinstance(item,ast.Name):
                 self.stack_frame[-1]['condition_time'] += 1
                 kwargs_ = copy.deepcopy(kwargs)
                 if mode:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 else:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 
 
@@ -1419,11 +1460,11 @@ class Parser(py_modifier):
                 kwargs_ = copy.deepcopy(kwargs)
                 if mode:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 else:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 
                 self.mcf_reset_score(f'#{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective}',func,**kwargs)
@@ -1436,11 +1477,11 @@ class Parser(py_modifier):
                 kwargs_ = copy.deepcopy(kwargs)
                 if mode:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 else:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 
                 value = self.preBinOp(item,item.op,func,-1,-1,**kwargs)
@@ -1457,11 +1498,11 @@ class Parser(py_modifier):
                 kwargs_ = copy.deepcopy(kwargs)
                 if mode:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 else:
                     self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/{self.stack_frame[-1]["condition_time"]}',func,prefix=self.BoolOp_get_prefix(tree,condition_time,func,**kwargs),**kwargs)
-                    kwargs['p']=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                    kwargs['p']=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                     kwargs['f2']=f'{self.stack_frame[-1]["condition_time"]}'
                 
                 returnValue =  self.preSubscript(item,func,**kwargs)
@@ -1578,9 +1619,9 @@ class Parser(py_modifier):
         self.mcf_new_stack_inherit_data(func,**kwargs)
         self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
         kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-        kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+        kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
         kwargs['Is_new_function'] = False
-        self.BoolOp(value,0,func,True,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+        self.BoolOp(value,0,func,True,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
         self.BoolOp_operation(value,0,0,func,**kwargs)
 
     def Compare_call(self,value:ast.Compare,func:str,*args,**kwargs):
@@ -1592,7 +1633,7 @@ class Parser(py_modifier):
         self.mcf_new_stack(func,**kwargs)
         self.mcf_new_stack_inherit_data(func,**kwargs)
         self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-        self.Compare(value,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+        self.Compare(value,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
         self.write_file(func,f'scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} 0\n',**kwargs)
         self.write_file(func,f'execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective} matches 1 run scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
 
@@ -1602,7 +1643,7 @@ class Parser(py_modifier):
         self.mcf_new_stack_inherit_data(func,**kwargs)
         self.stack_frame[-1]['condition_time'] += 1
         self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-        self.UnaryOp(value,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+        self.UnaryOp(value,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
         self.write_file(func,f'scoreboard players operation #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} = #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective}\n',**kwargs)
 
 ##
@@ -1617,25 +1658,25 @@ class Parser(py_modifier):
         if isinstance(tree.operand,ast.BoolOp):
             if mode:
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                 kwargs['Is_new_function'] = False
-                self.BoolOp(tree.operand,condition_time+1,func,mode,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.BoolOp(tree.operand,condition_time+1,func,mode,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.BoolOp_operation(tree.operand,0,0,func,**kwargs)
                 #取反
                 self.get_condition_reverse(func,**kwargs)
             else:
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                 kwargs['Is_new_function'] = False
                 
-                self.BoolOp(tree.operand,condition_time+1,func,False,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.BoolOp(tree.operand,condition_time+1,func,False,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.BoolOp_operation(tree.operand,0,0,func,**kwargs)
                 #取反
                 self.get_condition_reverse(func,**kwargs)
         if isinstance(tree.operand,ast.BinOp):
             if mode:
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
                 kwargs['Is_new_function'] = False
                 value = self.preBinOp(tree.operand,tree.operand.op,func,-1,-1,**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].boolOPS','append',{"value":0},func,**kwargs)
@@ -1648,7 +1689,7 @@ class Parser(py_modifier):
                 self.get_condition_reverse(func,**kwargs)
             else:
                 kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-                kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//'
+                kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/'
                 kwargs['Is_new_function'] = False
                 value = self.preBinOp(tree.operand,tree.operand.op,func,-1,-1,**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].boolOPS','append',{"value":0},func,**kwargs)
@@ -1661,22 +1702,22 @@ class Parser(py_modifier):
                 self.get_condition_reverse(func,**kwargs)
         elif isinstance(tree.operand,ast.Compare):
             if mode:
-                self.Compare(tree.operand,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.Compare(tree.operand,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.write_file(func,f'execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective} matches 1 run scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
                 #取反
                 self.get_condition_reverse(func,**kwargs)
             else:
-                self.Compare(tree.operand,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.Compare(tree.operand,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 self.write_file(func,f'execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective} matches 1 run scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} 1\n',**kwargs)
                 #取反
                 self.get_condition_reverse(func,**kwargs)
         elif isinstance(tree.operand,ast.UnaryOp):
             if mode:
-                self.UnaryOp(tree.operand,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.UnaryOp(tree.operand,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 #取反
                 self.get_condition_reverse(func,**kwargs)
             else:
-                self.UnaryOp(tree.operand,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//elif_{self.stack_frame[-1]["elif_time"]}//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+                self.UnaryOp(tree.operand,mode,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/elif_{self.stack_frame[-1]["elif_time"]}/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
                 #取反
                 self.get_condition_reverse(func,**kwargs)
         elif isinstance(tree.operand,ast.Name):
@@ -1731,7 +1772,7 @@ class Parser(py_modifier):
 
         kwargs_ = copy.deepcopy(kwargs)
         kwargs['Is_new_function'] = False
-        kwargs['p'] = f'{func}//while_{self.stack_frame[-1]["while_time"]}//'
+        kwargs['p'] = f'{func}/while_{self.stack_frame[-1]["while_time"]}/'
         kwargs['f2'] = f'_start'
         ## is_continue
         self.write_file(func,f'execute if data storage {defualt_STORAGE} stack_frame[-1].is_continue run scoreboard players reset #{defualt_STORAGE}.stack.end {scoreboard_objective}\n',**kwargs)
@@ -1740,12 +1781,12 @@ class Parser(py_modifier):
         self.mcf_call_function(f'{func}/while_{self.stack_frame[-1]["while_time"]}/condition/_start',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
         
 
-        kwargs['p'] = f'{func}//while_{self.stack_frame[-1]["while_time"]}//condition//'
+        kwargs['p'] = f'{func}/while_{self.stack_frame[-1]["while_time"]}/condition/'
         # 类型扩建TODO
         if isinstance(tree.test,ast.Name):
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
             kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
             kwargs['Is_new_function'] = False
             self.stack_frame[-1]['condition_time'] = 0
             self.stack_frame[-1]['condition_time'] += 1
@@ -1758,7 +1799,7 @@ class Parser(py_modifier):
         elif isinstance(tree.test,ast.Call):
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
             kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
             kwargs['Is_new_function'] = False
             self.stack_frame[-1]['condition_time'] = 0
             self.stack_frame[-1]['condition_time'] += 1
@@ -1768,16 +1809,16 @@ class Parser(py_modifier):
         elif isinstance(tree.test,ast.UnaryOp):
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
             kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
             kwargs['Is_new_function'] = False
             self.stack_frame[-1]['condition_time'] = 1
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-            self.UnaryOp(tree.test,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+            self.UnaryOp(tree.test,True,self.stack_frame[-1]["condition_time"],func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
             self.write_file(func,f'scoreboard players operation #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} = #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.{self.stack_frame[-1]["condition_time"]} {scoreboard_objective}\n',**kwargs)
         elif isinstance(tree.test,ast.Constant):
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
             kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
             kwargs['Is_new_function'] = False
             self.stack_frame[-1]['condition_time'] = 0
             self.stack_frame[-1]['condition_time'] += 1
@@ -1789,23 +1830,23 @@ class Parser(py_modifier):
         elif isinstance(tree.test,ast.Compare):
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
             kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
             kwargs['Is_new_function'] = False
             self.stack_frame[-1]['condition_time'] = 0
-            self.Compare_call(tree.test,func,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+            self.Compare_call(tree.test,func,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
             self.stack_frame[-1]['condition_time'] = 0
             self.mcf_remove_stack_data(func,**kwargs)
         elif isinstance(tree.test,ast.BoolOp):
             self.stack_frame[-1]['condition_time'] = 0
             self.stack_frame[-1]['condition_time'] += 1
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
-            self.BoolOp(tree.test,1,func,True,p=f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
+            self.BoolOp(tree.test,1,func,True,p=f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/',f2=f'{self.stack_frame[-1]["condition_time"]}',ClassName=kwargs.get("ClassName"))
             self.BoolOp_operation(tree.test,0,0,func,**kwargs)
             self.stack_frame[-1]['condition_time'] = 0
         elif isinstance(tree.test,ast.Subscript):
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
             kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
             kwargs['Is_new_function'] = False
             self.stack_frame[-1]['condition_time'] += 1
             returnValue =  self.preSubscript(tree.test,func,**kwargs)
@@ -1819,7 +1860,7 @@ class Parser(py_modifier):
             self.stack_frame[-1]['condition_time'] += 1
             self.mcf_call_function(f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/{self.stack_frame[-1]["condition_time"]}',func,prefix=f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ",**kwargs)
             kwargs['f2'] = f'{self.stack_frame[-1]["condition_time"]}'
-            kwargs['p'] = f'{func}//condition_{(self.stack_frame[-1]["BoolOpTime"])}//if//'
+            kwargs['p'] = f'{func}/condition_{(self.stack_frame[-1]["BoolOpTime"])}/if/'
             kwargs['Is_new_function'] = False
             value = self.preBinOp(tree.test,tree.test.op,func,-1,-1,**kwargs)
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].boolOPS','append',{"value":0},func,**kwargs)
@@ -1829,15 +1870,15 @@ class Parser(py_modifier):
             self.write_file(func,f'execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.temp {scoreboard_objective} matches ..0 run scoreboard players set #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} 0\n',**kwargs)
             if not value["isConstant"]: self.mcf_remove_Last_exp_operation(func,**kwargs)
         # body
-        kwargs['p'] = f'{func}//while_{self.stack_frame[-1]["while_time"]}//'
+        kwargs['p'] = f'{func}/while_{self.stack_frame[-1]["while_time"]}/'
         kwargs['f2'] = f'_start'
         self.write_file(func,f'##while 主程序\n',**kwargs)
 
         self.mcf_call_function(f'{func}/while_{self.stack_frame[-1]["while_time"]}/main',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run execute if score #{defualt_NAME}.sys.c.{(self.stack_frame[-1]["BoolOpTime"])}.pass {scoreboard_objective} matches 1 run ',**kwargs)
         temp_value = self.stack_frame[-1]["while_time"]
-        self.walk(tree.body,func,-1,p=f'{func}//while_{self.stack_frame[-1]["while_time"]}//',f2=f'main',ClassName=kwargs.get("ClassName"))
+        self.walk(tree.body,func,-1,p=f'{func}/while_{self.stack_frame[-1]["while_time"]}/',f2=f'main',ClassName=kwargs.get("ClassName"))
 
-        self.mcf_call_function(f'{func}/while_{temp_value}/_start',func,p=f'{func}//while_{temp_value}//',f2=f'main',ClassName=kwargs.get("ClassName"))
+        self.mcf_call_function(f'{func}/while_{temp_value}/_start',func,p=f'{func}/while_{temp_value}/',f2=f'main',ClassName=kwargs.get("ClassName"))
 # break
     def Break(self,tree:ast.Break,func,*args,**kwargs):
         '''Break 处理'''
@@ -1868,7 +1909,7 @@ class Parser(py_modifier):
         kwargs_ = copy.deepcopy(kwargs)
 
         kwargs['Is_new_function'] = False
-        kwargs['p'] = f'{func}//for_{self.stack_frame[-1]["for_time"]}//'
+        kwargs['p'] = f'{func}/for_{self.stack_frame[-1]["for_time"]}/'
         kwargs['f2'] = f'_start'
         ##初始化 迭代器列表
         self.write_file(func,f'#迭代器初始化\n',**kwargs)
@@ -1879,36 +1920,36 @@ class Parser(py_modifier):
         self.write_file(func,f'execute if data storage {defualt_STORAGE} stack_frame[-1].is_continue run data remove storage {defualt_STORAGE} stack_frame[-1].is_continue\n',**kwargs)
         #
         self.mcf_call_function(f'{func}/for_{self.stack_frame[-1]["for_time"]}/iterator/_start',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
-        kwargs['p'] = f'{func}//for_{self.stack_frame[-1]["for_time"]}//iterator//'
+        kwargs['p'] = f'{func}/for_{self.stack_frame[-1]["for_time"]}/iterator/'
         if isinstance(tree.target,ast.Name):
             kwargs['f2'] = f'_start'
-            kwargs['p'] = f'{func}//for_{self.stack_frame[-1]["for_time"]}//iterator//'
+            kwargs['p'] = f'{func}/for_{self.stack_frame[-1]["for_time"]}/iterator/'
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.target.id}","temp":1b}}].value','set',f'storage {defualt_STORAGE} stack_frame[-1].for_list[0].value',func,**kwargs)
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].for_list[0]','remove','',func,**kwargs)
             if isinstance(tree.iter,ast.Call):
                 kwargs['f2'] = f'_init'
-                kwargs['p'] = f'{func}//for_{self.stack_frame[-1]["for_time"]}//iterator//'
+                kwargs['p'] = f'{func}/for_{self.stack_frame[-1]["for_time"]}/iterator/'
                 # 函数返回值 赋值
                 self.Expr(ast.Expr(value=tree.iter),func,-1,**kwargs)
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].for_list','set',f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value',func,**kwargs)
 
         # body
-        kwargs['p'] = f'{func}//for_{self.stack_frame[-1]["for_time"]}//'
+        kwargs['p'] = f'{func}/for_{self.stack_frame[-1]["for_time"]}/'
         kwargs['f2'] = f'_start'
         self.write_file(func,f'##for 主程序\n',**kwargs)
         self.mcf_call_function(f'{func}/for_{self.stack_frame[-1]["for_time"]}/main',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
         temp_value = self.stack_frame[-1]["for_time"]
         ## 
         
-        self.walk(tree.body,func,-1,p=f'{func}//for_{self.stack_frame[-1]["for_time"]}//',f2=f'main',ClassName=kwargs.get("ClassName"))
-        self.mcf_call_function(f'{func}/for_{temp_value}/main',func,p=f'{func}//for_{temp_value}//',f2=f'main',ClassName=kwargs.get("ClassName"),prefix = f'execute if data storage {defualt_STORAGE} stack_frame[-1].for_list[0] run ')
+        self.walk(tree.body,func,-1,p=f'{func}/for_{self.stack_frame[-1]["for_time"]}/',f2=f'main',ClassName=kwargs.get("ClassName"))
+        self.mcf_call_function(f'{func}/for_{temp_value}/main',func,p=f'{func}/for_{temp_value}/',f2=f'main',ClassName=kwargs.get("ClassName"),prefix = f'execute if data storage {defualt_STORAGE} stack_frame[-1].for_list[0] run ')
         ##
 
 ##
 
 # list
     def List(self,tree:ast.List,func:str,loop_time=0,*args,**kwargs):
-        ''''列表 处理'''
+        '''列表 处理'''
         var_list = [] #存储到编译器的值（主要是类型）
         current_var_list = [] #存储到编译器的值（主要是类型）
         OnlyContent = True # 常数优化
@@ -2017,7 +2058,7 @@ class Parser(py_modifier):
         
         if isinstance(tree.value,ast.Attribute):
             ReturnData = self.AttributeHandler(tree.value,func,False,**kwargs)
-            print("6666 ",ReturnData)
+            
             ReturnValue = ReturnData.get('ReturnValue')
             inputData = ReturnData.get(inputData)
             if not IsCallFuc:
@@ -2089,6 +2130,56 @@ class Parser(py_modifier):
         
         self.walk(tree.body,func,index,**kwargs)
 
+# Dict
+    def Dict(self,tree:ast.Dict,func:str,loop_time=0,*args,**kwargs):
+        '''字典 处理'''
+        var_dict = {} #存储到编译器的值（主要是类型）
+        var_value = {} #存储到编译器的值（主要是类型）
+        length = len(tree.keys)
+        keys:list = tree.keys
+        values:list = tree.values
+        if loop_time==0:
+            # 重置
+            self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK','set',[{}],func,**kwargs)
+            self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerV','set',{},func,**kwargs)
+        for i in range(length):
+            #优化
+            if isinstance(values[i],ast.Constant) and isinstance(keys[i],ast.Constant):
+                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'','set',values[i].value,func,**kwargs)
+                continue
+            elif isinstance(values[i],ast.Name) and isinstance(keys[i],ast.Constant):
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'','set',f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{values[i].id}"}}].value',func,**kwargs)
+                continue
+            
+            # 处理值
+            self.write_file(func,f'#value: \n',**kwargs)
+            if isinstance(values[i],ast.Constant):
+                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerV','set',values[i].value,func,**kwargs)
+            elif isinstance(values[i],ast.Name):
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerV','set',f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{values[i].id}"}}].value',func,**kwargs)
+            elif isinstance(values[i],ast.List):
+                self.List(values[i],func,0,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerV','set',f'storage {defualt_STORAGE} data.list_handler',func,**kwargs)
+            elif isinstance(values[i],ast.Dict):
+                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK','append',{},func,**kwargs)
+                # self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerV','append',{},func,**kwargs)
+                self.Dict(values[i],func,loop_time+1,*args,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerV','set',f'storage {defualt_STORAGE} data.dict_handlerK[-1]',func,**kwargs)
+                self.write_file(func,f'data remove storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
+                # self.write_file(func,f'data remove storage {defualt_STORAGE} data.dict_handlerV\n',**kwargs)
+            
+            # 处理键名
+            self.write_file(func,f'#key: \n',**kwargs)
+            if isinstance(keys[i],ast.Constant):
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'','set',f'storage {defualt_STORAGE} data.dict_handlerV',func,**kwargs)
+            elif isinstance(keys[i],ast.Name):
+                self.mcf_build_dynamic_command(
+                    [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{keys[i].id}"}}].value'],
+                    [f'$data modify storage {defualt_STORAGE} data.dict_handlerK[-1].\'$(arg0)\' set from torage {defualt_STORAGE} data.dict_handlerV'],
+                    func,**kwargs
+                )
+            
+        return {"value":var_dict,"type":"dict"}
 
 # python内置函数处理器
 class System_function(Parser):
@@ -2348,7 +2439,7 @@ class mc_function(Parser):
                 Tagsname = str(self.get_value(arg[0],func,**kwargs)) + '.json' if len(arg) >= 1 else "load.json"
                 NameSpace = self.get_value(arg[1],func,**kwargs) if len(arg) >= 2 else defualt_NAME
                 Value = json.dumps({"replace": False,"values": self.get_value(arg[2],func,**kwargs)}, indent=2,ensure_ascii=False) if len(arg) >= 3 else json.dumps({"replace": False,"values": []}, indent=2,ensure_ascii=False)
-                path = defualt_DataPath+NameSpace +'\\tags\\' + self.get_value(arg[3],func,**kwargs) if len(arg) >= 4 else defualt_DataPath+NameSpace +'\\tags\\'
+                path = defualt_DataPath+NameSpace +'/tags/' + self.get_value(arg[3],func,**kwargs) if len(arg) >= 4 else defualt_DataPath+NameSpace +'/tags/'
                 self.WriteT(Value,Tagsname,path)
                 return {"value":True,"type":int}
             elif(func_name == 'checkBlock'):
@@ -2652,7 +2743,7 @@ class EventHandler(DecoratoHandler):
                 # call
                 self.write_file(f"",f"execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run function {defualt_NAME}:events/event_{eventCounter}/_start",f2='tick')
                 self.write_file(
-                    f"events//event_{eventCounter}",
+                    f"events/event_{eventCounter}",
                     f"#检测\nscoreboard players set #{defualt_NAME}.sys.events_{eventCounter}.pass {scoreboard_objective} 0\nfunction {defualt_NAME}:events/event_{eventCounter}/check\n#通过\nexecute if score #{defualt_NAME}.sys.events_{eventCounter}.pass {scoreboard_objective} matches 1 run function {defualt_NAME}:{callFunctionName}/_start",
                     f2='_start')
                 # check
@@ -2664,7 +2755,7 @@ class EventHandler(DecoratoHandler):
                     if isinstance(i,ast.Constant):
                         Selector = i.value
 
-                self.write_file(f"events//event_{eventCounter}",f"execute as {Selector} at @s if predicate {defualt_NAME}:is_down_zero run scoreboard players set #{defualt_NAME}.sys.events_{eventCounter}.pass {scoreboard_objective} 1",f2='check')
+                self.write_file(f"events/event_{eventCounter}",f"execute as {Selector} at @s if predicate {defualt_NAME}:is_down_zero run scoreboard players set #{defualt_NAME}.sys.events_{eventCounter}.pass {scoreboard_objective} 1",f2='check')
         elif self.check(decorator) == 2:
             if(decorator.attr == 'entityDeath'):
                 ...
@@ -2703,7 +2794,7 @@ class FunctionTagHandler(DecoratoHandler):
                     Tagsname = decorator.args[0].value + '.json'
                     NameSpace = decorator.args[1].value if len(decorator.args) >= 2 else "minecraft"
                     functionName = self.get_func_info(kwargs.get("ClassName"),callFunctionName,**kwargs).get("callPath").replace('_start','_call')
-                    path = defualt_DataPath+NameSpace +'\\tags\\functions\\'
+                    path = defualt_DataPath+NameSpace +'/tags/functions/'
                     self.mcf_func_tags_add(path,Tagsname,functionName)
                     kwargs['f2'] = f'_call'
                     self.mcf_new_stack(callFunctionName,**kwargs)
@@ -2732,14 +2823,14 @@ class CacheHandler(DecoratoHandler):
         self.mcf_call_function(f'{callPath}/dync_{self.stack_frame[0]["dync"]+1}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',WritePath,True,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
         self.write_file(WritePath,f"execute if score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run return 1\n",**kwargs)
         # 内容
-        kwargs['p'] = f'{WritePath}//dync_{self.stack_frame[0]["dync"]}//'
+        kwargs['p'] = f'{WritePath}/dync_{self.stack_frame[0]["dync"]}/'
         kwargs['f2'] = f'_start'
 
         self.write_file(WritePath,f'##    动态命令\n$data modify storage {defualt_STORAGE} stack_frame[-1].dync.arg0 set value \'$(arg0)\'\n$data modify storage {defualt_STORAGE} stack_frame[-1].key set value \'$(arg0)\'\n',inNewFile=True,**kwargs)
         self.stack_frame[0]["dync"] += 1
         # 字符串的参数作为键，索引结果
         # 内容
-        kwargs['p'] = f'{WritePath}//dync_{self.stack_frame[0]["dync"]}//'
+        kwargs['p'] = f'{WritePath}/dync_{self.stack_frame[0]["dync"]}/'
         CachedData = f'storage {defualt_STORAGE} stack_frame[0].CachedFunctions[{{"id":"{FunctionName}"}}].value.\'$(arg0)\''
         if kwargs.get("ClassName"):
             CachedData = f'storage {defualt_STORAGE} stack_frame[0].CachedMethod[{{"id":"{kwargs.get("ClassName")}"}}].value[{{"id":"{FunctionName}"}}].value.\'$(arg0)\''

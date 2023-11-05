@@ -23,8 +23,8 @@ def update_config():
     cfg = read_json.read('config.json')['config']
     global defualt_DataPath
     global defualt_PATH
-    defualt_DataPath = cfg['path'][Pathtime]+"data\\"
-    defualt_PATH = cfg['path'][Pathtime]+"data\\"+cfg['name'] + '\\'
+    defualt_DataPath = cfg['path'][Pathtime]+"data/"
+    defualt_PATH = cfg['path'][Pathtime]+"data/"+cfg['name'] + '/'
 
 class mcf_modifier(editor_file):
     '''有光mcf storage的修改'''
@@ -157,7 +157,7 @@ execute store result storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":
         self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
         self.write_file(func,f'##函数调用_end\n',**kwargs)
         # 内容
-        kwargs['p'] = f'{func}//dync_{self.stack_frame[0]["dync"]}//'
+        kwargs['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
         kwargs['f2'] = f'_start'
         self.write_file(func,f'##    动态命令\n$data modify storage {defualt_STORAGE} data.exp_operation[-1].value set value ',**kwargs)
         self.write_file(func,f'\'$(arg0)$(arg1)\'',**kwargs)
@@ -298,7 +298,7 @@ execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} r
     def mcf_stack_return(self,func:str,*args,**kwargs):
         '''栈 中 return'''
         self.write_file(func,f'scoreboard players set #{defualt_STORAGE}.stack.end {scoreboard_objective} 1\n',**kwargs)
-        self.write_file(func,f'\n    ##终止\n    return 1\n    ##\n',**kwargs)
+        self.write_file(func,f'\n#END\nreturn 1\n',**kwargs)
         # self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_return set value 1b\n',**kwargs)
         # self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].is_end set value 1b\n',**kwargs)
 
@@ -326,8 +326,8 @@ execute store result score #{defualt_NAME}.system.temp2 {scoreboard_objective} r
     def mcf_new_predicate(self,content:str,predicateName:str,path="",*args,**kwargs):
         '''新建一个谓词'''
         if path != "":
-            path = '//'+path
-        path_ = defualt_DataPath+defualt_NAME+"\\predicates"+path
+            path = '/'+path
+        path_ = defualt_DataPath+defualt_NAME+"/predicates"+path
         
         self.WriteT(content,predicateName+".json",path=path_)
 # 函数标签添加函数

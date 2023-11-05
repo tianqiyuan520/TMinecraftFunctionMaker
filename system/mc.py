@@ -36,44 +36,44 @@ def run(command:str = "say hello world",record=False,flag:str="result"):
 def NewFunction(name=None,path=None) -> None:
     """
         新建函数
-        - 默认在 {数据包}\\{命名空间}\\functions\\path 下
+        - 默认在 {数据包}/{命名空间}/functions/path 下
         - name 为函数名(例如:"a","test") 
-        - path 为相对路径加函数名(例如:"x\\","test2\\")
+        - path 为相对路径加函数名(例如:"x/","test2/")
 
         example:
-        >>> NewFunction(name="test",path="abc\\xc\\")
+        >>> NewFunction(name="test",path="abc/xc/")
         
-        将在 {数据包}\\{命名空间}\\functions\\abc\\xc\\ 下 创建函数 test.mcfunction
+        将在 {数据包}/{命名空间}/functions/abc/xc/ 下 创建函数 test.mcfunction
     """
 
 def WriteFunction(name=None,Command=None,mode=None,path=None) -> None:
     """
         将命令写入函数中
-        - 默认在 {数据包}\\{命名空间}\\functions\\path 下
+        - 默认在 {数据包}/{命名空间}/functions/path 下
         - name 为函数名(例如:"a","test") 
-        - path 为相对路径加函数名(例如:"x\\","test2\\")
+        - path 为相对路径加函数名(例如:"x/","test2/")
         - Command  数组 (例如：["say 1","say 2"])
         - mode： "w"覆写，"a"追加 默认为追加模式
 
         example:
-        >>> WriteFunction("test",["say 1"],"a","abc\\xc\\")
+        >>> WriteFunction("test",["say 1"],"a","abc/xc/")
         >>> 等价于 WriteFunction("abc/xc/test",["say 1"])
         
-        将在 {数据包}\\{命名空间}\\functions\\abc\\xc\\test 中 写入 say 1
+        将在 {数据包}/{命名空间}/functions/abc/xc/test 中 写入 say 1
     """
 
 def newTags(TagName=None,NameSpace=None,Value=None,Path=None) -> None:
     """
         新建 标签 （ 命名空间/Tags/XX ）
-        - 默认在 {数据包}\\{命名空间}\\Tags\\ 下
+        - 默认在 {数据包}/{命名空间}/Tags/ 下
         - Value 命名空间 + 函数名称 的 数组 (例如:["test:load/_start","test:xx"...]) 
-        - Path 为相对路径加函数名(例如:"x\\","test2\\")
+        - Path 为相对路径加函数名(例如:"x/","test2/")
         - TagName 标签名称
 
         example:
-        >>> newTags("load","minecraft",["test:a"],"functions\\3")
+        >>> newTags("load","minecraft",["test:a"],"functions/3")
         
-        将在 {数据包}\\minecraft\\Tags\\functions\\3\\load 下 写入 ["test:a"]
+        将在 {数据包}/minecraft/Tags/functions/3/load 下 写入 ["test:a"]
     """
 
 

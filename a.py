@@ -149,9 +149,15 @@ def reload():
 #         wrapper()
 #         def wrapper():
 #             def inner():
-#                 wrapper()
+#                 while 1==1:
+#                     wrapper()
 #             inner()
 #         inner()
 #     def func2(self):
 #         ...
+
+m = "abc"
+a = {"abc":m,"key":{"name":"1"},"x":[0,["k"]]}
+b = a[m]
+print(b,a["key"]['name'],a['x'][1][0])
 
