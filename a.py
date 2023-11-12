@@ -156,7 +156,7 @@ def reload():
 #     def func2(self):
 #         ...
 
-## 字典
+# 字典
 # m = "abc"
 # a = {
 #     "abc":"def",
@@ -184,6 +184,6 @@ def reload():
 #     return a[arg]
 # print(get2("name"))
 
-# get方法
+# # get方法
 # a = {"name":"123"}
 # print(a.get("name"))

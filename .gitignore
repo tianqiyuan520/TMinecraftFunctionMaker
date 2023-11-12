@@ -4,5 +4,6 @@ QTgui/**
 vscodeExtension/**
 .vscode/**
 test/**
+dist/**
 backup/**
 封面.psd

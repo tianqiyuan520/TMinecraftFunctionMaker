@@ -14,13 +14,13 @@ import time
 if __name__ == "__main__":
 
     try:
-        ## play music
-        # from pydub import AudioSegment
-        # from pydub.playback import play
-        # import random
-        # rand = random.choice([1,2])
-        # song = AudioSegment.from_file(f"sounds/smithing_table{rand}.mp3", format="mp3")
-        # play(song)
+        # play music
+        from pydub import AudioSegment
+        from pydub.playback import play
+        import random
+        rand = random.choice([1,2])
+        song = AudioSegment.from_file(f"sounds/smithing_table{rand}.mp3", format="mp3")
+        play(song)
         ...
     except:
         # print("Missing playsound\npip install pydub\npip install simpleaudio")
