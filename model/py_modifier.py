@@ -77,11 +77,14 @@ class py_modifier(mcf_modifier):
             except:
                 return None
         return None
-    def change_listVar_by_index(self,arr,index:list,Callfunc,*args,**kwargs):
+    def change_listVar_by_index(self,arr,index:list,Callfunc,Dict=False,*args,**kwargs):
         '''修改对应索引的数据(list类型)\n修改数值函数'''
         
         if len(index) == 1:
             try:
+                if Dict:
+                    arr[index[0]] = Callfunc(arr[index[0]])
+                    return arr
                 arr[index[0]] = Callfunc(arr[index[0]])
                 # arr[index[0]] = value
                 return arr
@@ -89,6 +92,7 @@ class py_modifier(mcf_modifier):
                 return arr
         else:
             try:
+                if Dict: return self.change_listVar_by_index(arr.get(index[0]),index[1::],Callfunc)
                 return self.change_listVar_by_index(arr[index[0]].get("value"),index[1::],Callfunc)
             except:
                 return arr

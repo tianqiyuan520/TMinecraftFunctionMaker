@@ -10,7 +10,6 @@
 import ast
 from TMCFM import TMCFM
 from read_config import read_json
-import platform
 import time
 if __name__ == "__main__":
 

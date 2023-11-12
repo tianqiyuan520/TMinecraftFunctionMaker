@@ -156,8 +156,34 @@ def reload():
 #     def func2(self):
 #         ...
 
-m = "abc"
-a = {"abc":m,"key":{"name":"1"},"x":[0,["k"]]}
-b = a[m]
-print(b,a["key"]['name'],a['x'][1][0])
+## 字典
+# m = "abc"
+# a = {
+#     "abc":"def",
+#     "key":{"name":"1"},
+#     "x":[0,["k"],{"name2":"2333"}]
+#     }
+# def get(arg):
+#     return "def"
 
+# print(a["x"][2]["name2"])
+# a["x"][2]=m # test change
+# print(a["x"][2])
+# funcValue = get("abc") # test call Function
+# print(funcValue)
+# print(a["key"]['name'],a['x'][1][0])
+
+# x = "32"
+# a = {"x":[{"abc":"test"}]}
+# a['x'][0]["abc"] = [2,3]
+# print(a['x'][0]["abc"][1])
+
+# a = {"name":"1"}
+# def get2(arg:"str"="3"): #使用切片时，若该变量为键名，需注明类型为字符串
+#     # arg:"str" = arg #使用切片时，若该变量为键名，需注明类型为字符串
+#     return a[arg]
+# print(get2("name"))
+
+# get方法
+# a = {"name":"123"}
+# print(a.get("name"))

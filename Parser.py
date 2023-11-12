@@ -217,9 +217,9 @@ class Parser(py_modifier):
                         storage["value"] = value["value"]
                         storage["type"] = value["type"]
                         return storage
-                    def change2(storage,func,kwargs):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.value set {value["data"]}\n',**kwargs)
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.type set {value["type"]}\n',**kwargs)
+                    def change2(storage,func,**kwargs):
+                        self.write_file(func,f'data modify {storage}.value set {value["data"]}\n',**kwargs)
+                        self.write_file(func,f'data modify {storage}.type set {value["type"]}\n',**kwargs)
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -243,7 +243,8 @@ class Parser(py_modifier):
                         storage["type"] = self.check_type(tree.value.value)
                         return storage
                     x.append(
-                        lambda storage,func,kwargs:self.mcf_modify_value_by_value(storage,'set',{"value":tree.value.value,"type":self.check_type(tree.value.value)},func,**kwargs)
+                        
+                        lambda storage,func,**kwargs:self.mcf_modify_value_by_value(storage,'set',{"value":tree.value.value,"type":self.check_type(tree.value.value)},func,**kwargs)
                         )
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -266,8 +267,8 @@ class Parser(py_modifier):
                         storage["value"] = value["value"]
                         storage["type"] = value["type"]
                         return storage
-                    def change2(storage,func,kwargs):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.value set from storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{tree.value.id}"}}]\n',**kwargs)
+                    def change2(storage,func,**kwargs):
+                        self.write_file(func,f'data modify {storage} set from storage {defualt_STORAGE} stack_frame[{index}].data[{{"id":"{tree.value.id}"}}]\n',**kwargs)
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -298,8 +299,8 @@ class Parser(py_modifier):
                         storage["value"] = returnValue["value"]
                         storage["type"] = returnValue["type"]
                         return storage
-                    def change2(storage2,func,kwargs):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage2}.value set from {storage}\n',**kwargs)
+                    def change2(storage2,func,**kwargs):
+                        self.write_file(func,f'data modify {storage2}.value set from {storage}\n',**kwargs)
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -327,8 +328,8 @@ class Parser(py_modifier):
                         storage["value"] = value["value"]
                         storage["type"] = value["type"]
                         return storage
-                    def change2(storage,func,kwargs):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.value set from storage {defualt_STORAGE} stack_frame[-1].return[-1].value\n',**kwargs)
+                    def change2(storage,func,**kwargs):
+                        self.write_file(func,f'data modify {storage}.value set from storage {defualt_STORAGE} stack_frame[-1].return[-1].value\n',**kwargs)
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -359,8 +360,8 @@ class Parser(py_modifier):
                         storage["value"] = value["value"]
                         storage["type"] = value["type"]
                         return storage
-                    def change2(storage,func,kwargs):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage} set from value {{"value":{value["value"]},"type":{value["type"]}}}\n',**kwargs)
+                    def change2(storage,func,**kwargs):
+                        self.write_file(func,f'data modify {storage} set value {{"value":{value["value"]},"type":{value["type"]}}}\n',**kwargs)
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -388,7 +389,7 @@ class Parser(py_modifier):
                         storage["value"] = 1
                         storage["type"] = "int"
                         return storage
-                    def change2(storage,func,kwargs):
+                    def change2(storage,func,**kwargs):
                         self.mcf_change_value_by_scoreboard(storage+'.value',f'#{defualt_NAME}.sys.c.0.pass {scoreboard_objective}','int','1',func,**kwargs)
                     x.append(change2)
                     x.append(change)
@@ -419,7 +420,7 @@ class Parser(py_modifier):
                         storage["value"] = 1
                         storage["type"] = "int"
                         return storage
-                    def change2(storage,func,kwargs):
+                    def change2(storage,func,**kwargs):
                         self.mcf_change_value_by_scoreboard(storage+'.value',f'#{defualt_NAME}.sys.c.0.pass {scoreboard_objective}','int','1',func,**kwargs)
                     x.append(change2)
                     x.append(change)
@@ -450,7 +451,7 @@ class Parser(py_modifier):
                         storage["value"] = 1
                         storage["type"] = "int"
                         return storage
-                    def change2(storage,func,kwargs):
+                    def change2(storage,func,**kwargs):
                         self.mcf_change_value_by_scoreboard(storage+'.value',f'#{defualt_NAME}.sys.c.0.pass {scoreboard_objective}','int','1',func,**kwargs)
                     x.append(change2)
                     x.append(change)
@@ -478,9 +479,10 @@ class Parser(py_modifier):
                         storage["value"] = value["value"]
                         storage["type"] = value["type"]
                         return storage
-                    def change2(storage,func,kwargs):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.value set from storage {defualt_STORAGE} data.list_handler\n',**kwargs)
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.type set from value "list"\n',**kwargs)
+                    def change2(storage,func,**kwargs):
+                        
+                        self.write_file(func,f'data modify {storage}.value set from storage {defualt_STORAGE} data.list_handler\n',**kwargs)
+                        self.write_file(func,f'$data modify {storage}.type set value "list"\n',**kwargs)
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -505,9 +507,9 @@ class Parser(py_modifier):
                         storage["value"] = value["value"]
                         storage["type"] = value["type"]
                         return storage
-                    def change2(storage,func,kwargs):
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.value set from storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
-                        self.write_file(func,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run data modify {storage}.type set from value "list"\n',**kwargs)
+                    def change2(storage,func,**kwargs):
+                        self.write_file(func,f'data modify {storage}.value set from storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
+                        self.write_file(func,f'$data modify {storage}.type set value "dict"\n',**kwargs)
                     x.append(change2)
                     x.append(change)
                     returnValue = self.preSubscript(i,func,True,x,**kwargs)
@@ -521,7 +523,6 @@ class Parser(py_modifier):
 # 增强分配
     def AugAssign(self,tree:ast.AugAssign,func:str,index:-1,*args,**kwargs):
         '''变量 赋值操作 += -= /= *='''
-        # 类型扩建TODO
         value = self.Assign(ast.Assign(targets=[ast.Name(id=tree.target.id)],value=ast.BinOp(left=ast.Name(id=tree.target.id),right=tree.value,op=tree.op)),func,index,*args,**kwargs)
 
 ## Global
@@ -769,6 +770,14 @@ class Parser(py_modifier):
             elif isinstance(tree.defaults[i],ast.Name):
                 # 变量赋值
                 self.py_change_value2(args_list[i],tree.defaults[i].id,func,True,index,**kwargs)
+        for i in range(-1,-1*len(tree.args)-1,-1):
+            ARG = tree.args[i]
+            try:
+                if isinstance(ARG.annotation,ast.Constant):
+                    # 常数赋值
+                    self.py_change_value_type(ARG.arg,ARG.annotation.value,-1,False,False,func,*args,**kwargs)
+            except:
+                pass
 
 # 表达式调用
     def Expr(self,tree:ast.Expr,func:str,index:-1,loopTime=0,*args,**kwargs):
@@ -886,7 +895,7 @@ class Parser(py_modifier):
                 else:
                     value = self.Expr(ast.Expr(value=Call.func),func,-1,loopTime+1,**kwargs)
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.call_list[-1][-1].value','set',f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value',func,**kwargs)
-                print(value)
+                
                 self.write_file(func,f'\n##    调用函数\n',**kwargs)
                 self.write_file(func,f'#参数处理\n',**kwargs)
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.call_list','append',[],func,**kwargs)
@@ -1123,94 +1132,109 @@ class Parser(py_modifier):
         self.mcf_stack_return(func,**kwargs)
         self.write_file(func,f'##函数返回值处理_end\n',**kwargs)
 # 切片处理前置
-    def preSubscript(self,tree:ast.Subscript,func,isAssign=False,Assignfunc=None,Dict=False,*args,**kwargs):
-        '''isAssign:是否为赋值,\n若为赋值则传入赋值函数\nAssignfunc赋值函数修改strage数值,类型;py数值,类型\n\nDict是否为字典类型'''
+    def preSubscript(self,tree:ast.Subscript,func,isAssign=False,Assignfunc=None,Dict=False,IsStorageArg=False,pretext=None,*args,**kwargs):
+        '''isAssign:是否为赋值,\n
+        若为赋值则传入赋值函数\n
+        Assignfunc赋值函数修改strage数值,类型;py数值,类型\n\n
+        Dict是否为字典类型\n\n
+        IsStorageArg传入的切片参数是否为mcf的storage'''
         if not isAssign:
-            pretext = f'$data modify storage {defualt_STORAGE} data.Subscript set from'
-            returnValue =  self.Subscript(tree,func,0,Dict,**kwargs)
+            if pretext ==None:pretext = f'$data modify storage {defualt_STORAGE} data.Subscript set from'
+            returnValue =  self.Subscript(tree,func,0,Dict,IsStorageArg=IsStorageArg,**kwargs)
             self.write_file(func,f'    ##动态命令调用\n',**kwargs)
             self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
             self.write_file(func,f'    ##动态命令调用end\n',**kwargs)
             # 内容
             kwargs['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
             kwargs['f2'] = f'_start'
-            self.write_file(func,f'##    动态命令\n',inNewFile=True,**kwargs)
+            self.write_file(func,f'##    动态命令62\n',inNewFile=True,**kwargs)
             #
-            self.write_file(func,f'{pretext} {returnValue[0]}\n',**kwargs)
+            self.write_file(func,f'{pretext} {returnValue[0]}\n',inNewFile=True,**kwargs)
             #
             self.stack_frame[0]["dync"] += 1
             #
-            x = self.get_listVar_by_index(returnValue[3],returnValue[2],Dict)
+            x = self.get_listVar_by_index(returnValue[3],returnValue[2],Dict,*args,**kwargs)
+            if x == None: x={"value":None,"type":None}
             return {"storage":f'storage {defualt_STORAGE} data.Subscript',"value":x.get("value"),"type":x.get("type")}
         else:
-            returnValue =  self.Subscript(tree,func,0,Dict,**kwargs)
-            self.write_file(func,f'    ##动态命令调用\n',**kwargs)
-            self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',**kwargs)
-            self.write_file(func,f'    ##动态命令调用end\n',**kwargs)
+            returnValue =  self.Subscript(tree,func,0,Dict,IsStorageArg=IsStorageArg,**kwargs)
+            
+            self.write_file(func,f'    ##动态命令调用\n',*args,**kwargs)
+            self.mcf_call_function(f'{func}/dync_{self.stack_frame[0]["dync"]}/_start with storage {defualt_STORAGE} stack_frame[-1].dync',func,False,f'execute unless score #{defualt_STORAGE}.stack.end {scoreboard_objective} matches 1 run ',*args,**kwargs)
+            self.write_file(func,f'    ##动态命令调用end\n',*args,**kwargs)
             # 内容
             kwargs['p'] = f'{func}/dync_{self.stack_frame[0]["dync"]}/'
             kwargs['f2'] = f'_start'
-            self.write_file(func,f'##    动态命令\n',inNewFile=True,**kwargs)
+            self.write_file(func,f'##    动态命令\n',inNewFile=True,*args,**kwargs)
             #
             self.write_file(func,f'$',inNewFile=True,**kwargs)
+            #检测是数组/字典
+            inputValue = returnValue[0]
+            if returnValue[0][-5:] == 'value':
+                inputValue = returnValue[0][0:-6]
+            Assignfunc[0](inputValue,func,**kwargs)
 
-            Assignfunc[0](returnValue[0][0:-6],func,kwargs)
             returnValue[3] = self.change_listVar_by_index(returnValue[3],returnValue[2],Assignfunc[1],Dict)
             self.stack_frame[0]["dync"] += 1
             #
-            return {"storage":returnValue[0],"value":returnValue[1]["value"],"type":returnValue[1]["type"]}
+            return {"storage":inputValue,"value":returnValue[1].get("value"),"type":returnValue[1].get("type")}
 # 切片 (列表或字典)
-    def Subscript(self,tree:ast.Subscript,func,loop_time=0,Dict=False,*args,**kwargs):
+    def Subscript(self,tree:ast.Subscript,func,loop_time=0,Dict=False,IsStorageArg=False,*args,**kwargs):
         '''切片处理\n返回 (storage,value)'''
         # 类型扩建TODO
         if isinstance(tree.value,ast.Subscript):
             returnValue =  self.Subscript(tree.value,func,loop_time+1,Dict,**kwargs)
             indexs = returnValue[2]
-            index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
-            indexs.append(index)
-            if isinstance(index,str):
-                return [returnValue[0]+f'.\'$(arg{loop_time})\'',returnValue[1],indexs,returnValue[3]]
+            index = self.Subscript_index(tree.slice,func,loop_time,Dict,IsStorageArg=IsStorageArg,**kwargs)
+            indexs.append(index.get("value"))
+            if isinstance(index.get("value"),str) or index.get("type") == "str":
+                if(returnValue[0][-1] != "."):
+                    return [returnValue[0]+f'.\'$(arg{loop_time})\'.value',returnValue[1],indexs,returnValue[3]]
+                return [returnValue[0]+f'\'$(arg{loop_time})\'.value',returnValue[1],indexs,returnValue[3]]
+            # if(returnValue[0][-1] != "."):
+                # return [returnValue[0]+f'.[$(arg{loop_time})].value',returnValue[1],indexs,returnValue[3]]
             return [returnValue[0]+f'[$(arg{loop_time})].value',returnValue[1],indexs,returnValue[3]]
         else:
             if isinstance(tree.value,ast.Call):
                 # 函数返回值
                 returnValue = self.Expr(ast.Expr(value=tree.value),func,-1,**kwargs)
-                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
-                if isinstance(index,str):
-                    return [f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value.\'$(arg{loop_time})\'',returnValue,[index],returnValue["value"]]
-                return [f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value[$(arg{loop_time})].value',returnValue,[index],returnValue["value"]]
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,IsStorageArg=IsStorageArg,**kwargs)
+                if isinstance(index.get("value"),str) or index.get("type") == "str":
+                    return [f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value.\'$(arg{loop_time})\'.value',returnValue,[index.get("value")],returnValue["value"]]
+                return [f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value[$(arg{loop_time})].value',returnValue,[index.get("value")],returnValue["value"]]
             elif isinstance(tree.value,ast.Name):
                 # 变量
                 index = 0
-                
-                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,IsStorageArg=IsStorageArg,**kwargs)
                 value = None
                 # value = self.py_get_value(tree.value.id,func)
                 valueType = None
-                if isinstance(index,str):
-                    return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.id}"}}].value.\'$(arg{loop_time})\'',{"value":value,"type":valueType},[index],self.py_get_value(tree.value.id,func)]
-                return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.id}"}}].value[$(arg{loop_time})].value',{"value":value,"type":valueType},[index],self.py_get_value(tree.value.id,func)]
+                if isinstance(index.get("value"),str) or index.get("type") == "str":
+                    return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.id}"}}].value.\'$(arg{loop_time})\'.value',{"value":value,"type":valueType},[index.get("value")],self.py_get_value(tree.value.id,func)]
+                return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.id}"}}].value[$(arg{loop_time})].value',{"value":value,"type":valueType},[index.get("value")],self.py_get_value(tree.value.id,func)]
             elif isinstance(tree.value,ast.BinOp):
                 # 运算
-                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,IsStorageArg=IsStorageArg,**kwargs)
                 value = self.preBinOp(tree.value,tree.value.op,func,-1,-1,**kwargs)
                 self.write_file(func,f'data modify storage {defualt_STORAGE} stack_frame[-1].Subscript2 set value {value["data"]}\n',**kwargs)
                 if not value["isConstant"]: self.mcf_remove_Last_exp_operation(func,**kwargs)
-                return [f'storage {defualt_STORAGE} stack_frame[-1].Subscript2[$(arg{loop_time})].value',{"value":0,"type":None},[index],value["value"]]
+                if isinstance(index.get("value"),str) or index.get("type") == "str":
+                    return [f'storage {defualt_STORAGE} stack_frame[-1].Subscript2.\'$(arg{loop_time})\'.value',{"value":0,"type":None},[index.get("value")],value["value"]]
+                return [f'storage {defualt_STORAGE} stack_frame[-1].Subscript2[$(arg{loop_time})].value',{"value":0,"type":None},[index.get("value")],value["value"]]
             elif isinstance(tree.value,ast.Constant):
-                index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
-                if isinstance(index,str):
-                    return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.value}"}}].value.\'$(arg{loop_time})]\'',{"value":0,"type":None},[index],self.py_get_value(tree.value.value,func)]
-                return [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.value.value}"}}].value[$(arg{loop_time})].value',{"value":0,"type":None},[index],self.py_get_value(tree.value.value,func)]
+                index = self.Subscript_index(tree.slice,func,loop_time,Dict,IsStorageArg=IsStorageArg,**kwargs)
+                if isinstance(index.get("value"),str) or index.get("type") == "str":
+                    return [f'{tree.value.value}.\'$(arg{loop_time})\'.value',{"value":0,"type":None},[index.get("value")],self.py_get_value(tree.value.value,func)]
+                return [f'{tree.value.value}[$(arg{loop_time})].value',{"value":0,"type":None},[index.get("value")],self.py_get_value(tree.value.value,func)]
             elif isinstance(tree.value,ast.List):
                 returnValue = self.List(tree.value,func,**kwargs)
                 index = self.Subscript_index(tree.slice,func,loop_time,Dict,**kwargs)
-                if isinstance(index,str):
-                    return [f'storage {defualt_STORAGE} data.list_handler.\'$(arg{loop_time}).\'',returnValue,[index],returnValue["value"]]
-                return [f'storage {defualt_STORAGE} data.list_handler[$(arg{loop_time})].value',returnValue,[index],returnValue["value"]]
+                if isinstance(index.get("value"),str) or index.get("type") == "str":
+                    return [f'storage {defualt_STORAGE} data.list_handler.\'$(arg{loop_time}).\'.value',returnValue,[index.get("value")],returnValue["value"]]
+                return [f'storage {defualt_STORAGE} data.list_handler[$(arg{loop_time})].value',returnValue,[index.get("value")],returnValue["value"]]
 
 # 切片指针处理器 (列表或字典)
-    def Subscript_index(self,tree,func,loop_time=0,Dict=False,*args,**kwargs):
+    def Subscript_index(self,tree,func,loop_time=0,Dict=False,IsStorageArg=False,*args,**kwargs):
 
         # 类型扩建TODO
         # 直接构建动态命令参数
@@ -1218,26 +1242,30 @@ class Parser(py_modifier):
             returnValue =  self.preSubscript(tree,func,**kwargs)
             storage = returnValue["storage"]
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',storage,func,**kwargs)
-            return returnValue["value"]
+            return returnValue
         elif isinstance(tree,ast.Name):
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{tree.id}"}}].value',func,**kwargs)
-            index = self.py_get_value(tree.id,func)
-            return index
+            
+            return self.py_get_var_info(tree.id,self.stack_frame[-1]["data"])
         elif isinstance(tree,ast.Call):
-            self.Expr(ast.Expr(value=tree),func,-1,**kwargs)
+            index = self.Expr(ast.Expr(value=tree),func,-1,**kwargs)
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value',func,**kwargs)
+            return index
         elif isinstance(tree,ast.BinOp):
             returnValue = self.preBinOp(tree,tree.op,func,-1,-1,**kwargs)
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',returnValue["data"],func,**kwargs)
             if not returnValue["isConstant"]: self.mcf_remove_Last_exp_operation(func,**kwargs)
-            return returnValue["value"]
+            return returnValue
         elif isinstance(tree,ast.Constant):
-            self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',tree.value,func,**kwargs)
-            return tree.value
+            if IsStorageArg:
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',tree.value,func,**kwargs)
+            else:
+                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',tree.value,func,**kwargs)
+            return {"value":tree.value,"type":self.check_type(tree.value)}
         elif isinstance(tree,ast.List):
             returnValue = self.List(tree,func,**kwargs)
             self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-1].dync.arg{loop_time}','set',f'storage {defualt_STORAGE} data.list_handler',func,**kwargs)
-            return returnValue["value"]
+            return returnValue
 
 ## 逻辑模块
 # if
@@ -1945,15 +1973,14 @@ class Parser(py_modifier):
         self.mcf_call_function(f'{func}/for_{temp_value}/main',func,p=f'{func}/for_{temp_value}/',f2=f'main',ClassName=kwargs.get("ClassName"),prefix = f'execute if data storage {defualt_STORAGE} stack_frame[-1].for_list[0] run ')
         ##
 
-##
 
-# list
-    def List(self,tree:ast.List,func:str,loop_time=0,*args,**kwargs):
+# List
+    def List(self,tree:ast.List,func:str,loop_time=0,ListCalled=False,DictCalled=False,*args,**kwargs):
         '''列表 处理'''
         var_list = [] #存储到编译器的值（主要是类型）
         current_var_list = [] #存储到编译器的值（主要是类型）
         OnlyContent = True # 常数优化
-        if loop_time==0:
+        if loop_time==0 and not ListCalled:
             # 重置
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.list_handler','set',[],func,**kwargs)
         if len(tree.elts) == 0:
@@ -2039,9 +2066,17 @@ class Parser(py_modifier):
                     OnlyContent = False
                     current_var_list = []
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.list_handler{text}','append',{"value":[]},func,**kwargs)
-                x = self.List(item,func,loop_time+1,**kwargs)
+                x = self.List(item,func,loop_time+1,ListCalled=True,DictCalled=DictCalled,**kwargs)
                 current_var_list = x["value"]
                 var_list.append({"value":x.get('value'),"type":x.get('type')})
+            elif isinstance(item,ast.Dict):
+                ReturnValue = self.Dict(item,func,0,ListCalled=ListCalled,DictCalled=DictCalled,*args,**kwargs)
+                
+                if not OnlyContent: 
+                    self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.list_handler{text}','append',{'value':0},func,**kwargs)
+                    self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.list_handler{text}[-1].value','set',f'storage {defualt_STORAGE} data.dict_handlerK[-1]',func,**kwargs)
+                var_list.append({"value":ReturnValue.get('value'),"type":self.check_type(ReturnValue.get('value'))})
+                current_var_list.append({"value":ReturnValue.get('value'),"type":self.check_type(ReturnValue.get('value'))})
         if OnlyContent and current_var_list:
             
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.list_handler{text}','set',current_var_list,func,**kwargs)
@@ -2131,24 +2166,24 @@ class Parser(py_modifier):
         self.walk(tree.body,func,index,**kwargs)
 
 # Dict
-    def Dict(self,tree:ast.Dict,func:str,loop_time=0,*args,**kwargs):
+    def Dict(self,tree:ast.Dict,func:str,loop_time=0,ListCalled=False,DictCalled=False,*args,**kwargs):
         '''字典 处理'''
         var_dict = {} #存储到编译器的值（主要是类型）
         var_value = {} #存储到编译器的值（主要是类型）
         length = len(tree.keys)
         keys:list = tree.keys
         values:list = tree.values
-        if loop_time==0:
+        if loop_time==0 and not DictCalled:
             # 重置
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK','set',[{}],func,**kwargs)
             self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerV','set',{},func,**kwargs)
         for i in range(length):
             #优化
             if isinstance(values[i],ast.Constant) and isinstance(keys[i],ast.Constant):
-                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'','set',values[i].value,func,**kwargs)
+                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'.value','set',values[i].value,func,**kwargs)
                 continue
             elif isinstance(values[i],ast.Name) and isinstance(keys[i],ast.Constant):
-                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'','set',f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{values[i].id}"}}].value',func,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'.value','set',f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{values[i].id}"}}].value',func,**kwargs)
                 continue
             
             # 处理值
@@ -2158,12 +2193,17 @@ class Parser(py_modifier):
             elif isinstance(values[i],ast.Name):
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerV','set',f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{values[i].id}"}}].value',func,**kwargs)
             elif isinstance(values[i],ast.List):
-                self.List(values[i],func,0,**kwargs)
+                self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK','append',{},func,**kwargs)
+                self.List(values[i],func,0,ListCalled=ListCalled,DictCalled=True,**kwargs)
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerV','set',f'storage {defualt_STORAGE} data.list_handler',func,**kwargs)
+                self.write_file(func,f'data remove storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
+            elif isinstance(values[i],ast.Call):
+                self.Expr(ast.Expr(value=values[i]),func,-1,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerV','set',f'storage {defualt_STORAGE} stack_frame[-1].return[-1].value',func,**kwargs)
             elif isinstance(values[i],ast.Dict):
                 self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerK','append',{},func,**kwargs)
                 # self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} data.dict_handlerV','append',{},func,**kwargs)
-                self.Dict(values[i],func,loop_time+1,*args,**kwargs)
+                self.Dict(values[i],func,loop_time+1,ListCalled=ListCalled,DictCalled=True,*args,**kwargs)
                 self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerV','set',f'storage {defualt_STORAGE} data.dict_handlerK[-1]',func,**kwargs)
                 self.write_file(func,f'data remove storage {defualt_STORAGE} data.dict_handlerK[-1]\n',**kwargs)
                 # self.write_file(func,f'data remove storage {defualt_STORAGE} data.dict_handlerV\n',**kwargs)
@@ -2171,11 +2211,11 @@ class Parser(py_modifier):
             # 处理键名
             self.write_file(func,f'#key: \n',**kwargs)
             if isinstance(keys[i],ast.Constant):
-                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'','set',f'storage {defualt_STORAGE} data.dict_handlerV',func,**kwargs)
+                self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} data.dict_handlerK[-1].\'{keys[i].value}\'.value','set',f'storage {defualt_STORAGE} data.dict_handlerV',func,**kwargs)
             elif isinstance(keys[i],ast.Name):
                 self.mcf_build_dynamic_command(
                     [f'storage {defualt_STORAGE} stack_frame[-1].data[{{"id":"{keys[i].id}"}}].value'],
-                    [f'$data modify storage {defualt_STORAGE} data.dict_handlerK[-1].\'$(arg0)\' set from torage {defualt_STORAGE} data.dict_handlerV'],
+                    [f'$data modify storage {defualt_STORAGE} data.dict_handlerK[-1].\'$(arg0)\'.value set from torage {defualt_STORAGE} data.dict_handlerV'],
                     func,**kwargs
                 )
             
@@ -2645,7 +2685,7 @@ class TypeAttributeHandler(Parser):
                 if self.attr == "replace":
                     return {"value":self.Value.replace(self.get_value(self.stack_frame[-1]["call_list"][0]),self.get_value(self.stack_frame[-1]["call_list"][1])),
                     "type":"str"}
-        if self.type == "list":
+        elif self.type == "list":
             if not self.IsCallFunc:
                 
                 if self.attr == "hash":
@@ -2668,6 +2708,19 @@ class TypeAttributeHandler(Parser):
                         if self.Value:
                             return {"value":self.Value.pop(0),"type":"list"}
                         return {"value":self.Value,"type":"list"}
+        elif self.type == "dict":
+            if not self.IsCallFunc:
+                if self.attr == "__hash__":
+                    return {"value":self.Value.__hash__()%2147483647,"type":"int"}
+            else:
+                if self.attr == "get":
+                    a = ast.Subscript(value=ast.Constant(value=self.storage), slice=ast.Constant(value=f'storage {defualt_STORAGE} data.call_list[-1][-1].value'))
+                    returnValue = self.preSubscript(a,func,IsStorageArg=True,**kwargs)
+                    value = returnValue["value"]
+                    valueType = returnValue["type"]
+                    self.mcf_modify_value_by_value(f'storage {defualt_STORAGE} stack_frame[-2].return','append',{"value":0},func,**kwargs)
+                    self.mcf_modify_value_by_from(f'storage {defualt_STORAGE} stack_frame[-2].return[-1].value','set',f'storage {defualt_STORAGE} data.Subscript',func,**kwargs)
+                    return {"value":value,"type":valueType}
         # 自定义的类
         elif not IsInbuilt:
             # if not self.IsCallFunc:
@@ -2812,7 +2865,6 @@ class CacheHandler(DecoratoHandler):
         x = self.get_func_info(kwargs.get("ClassName") if kwargs.get("ClassName") else "",callFunctionName,**kwargs)
         x['cached'] = True
         callPath = x['callPath'][0:-7]
-        print(WritePath)
         self.write_file(WritePath,f'##缓存函数-判断缓存数据\n    #先字符串化参数\n',**kwargs)
         # 参数转字符串
             #动态命令
